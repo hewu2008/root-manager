@@ -1,5 +1,4 @@
 <resources>
-
     <string name="app_name">root-manager</string>
-
+    <string name="browser_apk_file">浏览APK文件</string>
 </resources>

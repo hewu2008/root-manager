@@ -37,3 +37,8 @@
 <td>support</td> <td>目录，包含一些实用类</td>
 </tr>
 </table>
+
+秒装功能必须在已经root后的机器上才可以运行，360手机助手以root权限运行了qh_root_service服务进程名称为app_process，
+
+
+
