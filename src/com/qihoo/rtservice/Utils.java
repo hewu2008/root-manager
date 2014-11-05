@@ -24,11 +24,13 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.qihoo.constant.Constants;
 
 public class Utils {
 	static final String TAG = Utils.class.getSimpleName();
@@ -65,25 +67,29 @@ public class Utils {
 			"/system/bin/su",
 			"/system/xbin/su", };
 	
-	public static String exec(File dir, String classPath, String[] command) {
+	public static String execP(List<String> commands)
+	{
 		Process process = null;
 		DataOutputStream os = null;
 		String result = "";
 		try {
-			Log.d(TAG, command.toString());
-			ProcessBuilder pb = new ProcessBuilder(command);
-			pb.redirectErrorStream(true);
-			pb.directory(dir);
-			Map<String, String> env = pb.environment();
-			if (classPath != null) env.put("CLASSPATH", classPath);
-			process = pb.start();
+			process = Runtime.getRuntime().exec("su");
+			os = new DataOutputStream(process.getOutputStream());
+			for (String command : commands) {
+				os.writeBytes(command + "\n");
+			}
+			os.writeBytes("echo \"rc:\" $?\n");
+			os.writeBytes("exit\n");
+			os.flush();
 			process.waitFor();
-			result = Utils.readStream(process.getInputStream());
-			Log.e(TAG, "Process returned with " + process.exitValue());
-			Log.e(TAG, "Process stdout was: " + result);
+			if (process.exitValue() == 0) {
+				result = "success";
+			}else {
+				result = Utils.readStream(process.getErrorStream());
+			}
 			return result;
 		} catch (Exception e) {
-			Log.e(TAG, "Failed to run command", e);
+			Log.e(Constants.TAG, "Failed to run command", e);
 			return result;
 		} finally {
 			if (os != null)

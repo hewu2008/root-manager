@@ -14,16 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.qihoo.event;
+package com.qihoo.constant;
 
-public class ServiceStartEvent {
-	private String mErrorMessage;
-
-	public String getErrorMessage() {
-		return mErrorMessage;
-	}
-
-	public void setErrorMessage(String errorMessage) {
-		this.mErrorMessage = errorMessage;
-	}
+public class Constants {
+	public static final String TAG = "root-manager";
 }

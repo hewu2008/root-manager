@@ -1,6 +1,8 @@
 package com.uucun.root;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -13,7 +15,6 @@ import android.widget.TextView;
 
 import com.qihoo.appstore.R;
 import com.qihoo.event.ServiceStartEvent;
-import com.qihoo.permmgr.LocalRoot;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
 import com.qihoo.rtservice.Utils;
@@ -48,7 +49,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		initView();
 		setListener();
-		load360Library();
 		startRootService();
 	}
 	
@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
 		mStatusText = (TextView)findViewById(R.id.tv_status);
 		mBrowerApkFileBtn = (Button)findViewById(R.id.btn_browser_apk_file);
 		mBrowerApkFileBtn.setVisibility(View.GONE);
-		mStatusText.setText("当前状态:\n");
+		mStatusText.setText("status:\n");
 	}
 	
 	private void setListener() {
@@ -68,10 +68,10 @@ public class MainActivity extends Activity {
 				if (file.exists() == true && rtService != null) {
 					try {
 						boolean bRet = rtService.install(apkfile);
-						mStatusText.setText("静默安装结果:" + bRet + "\n");
+						mStatusText.setText("install result:" + bRet + "\n");
 					} catch (RemoteException e) {
 						e.printStackTrace();
-						mStatusText.setText("静默安装异常:" + e.getMessage() + "\n");
+						mStatusText.setText("install result:" + e.getMessage() + "\n");
 					}
 				}
 			}
@@ -79,36 +79,39 @@ public class MainActivity extends Activity {
 		EventBus.getDefault().register(this);
 	}
 	
-	private void load360Library() {
-		LocalRoot root = LocalRoot.getInstance();
-		int nRet = root.doRoot(this);
-		mStatusText.append("加载360动态库:" + nRet + "\n");
-	}
-	
 	private void startRootService() {
 		if (Utils.hasSuCmd() && getRTService() == null) {
-			mStatusText.append("正在启动后台ROOT服务...\n");
+			mStatusText.append("starting qh_root_service process, please wait...\n");
 			new Thread() {
 				@Override 
 				public void run() {
+					List<String> commands = new ArrayList<String>();
+					String exportCmd = "export CLASSPATH=$CLASSPATH:" + MainActivity.this.getPackageCodePath();
+					commands.add(exportCmd);
 					String servicePath = IRTServiceImpl.class.getName();
-					String startServiceCmd = String.format("app_process /system/bin %s --nice-name=%s --application", 
+					String startProcessCmd = String.format("app_process /system/bin %s --nice-name=%s --application &", 
 						servicePath, IRTServiceImpl.SERVICE_NAME);
-					String classPath = MainActivity.this.getPackageCodePath();
-					Utils.exec(getFilesDir().getParentFile(), classPath, new String[] {Utils.getSuPath(), "-c", startServiceCmd});
-					EventBus.getDefault().post(new ServiceStartEvent());
+					commands.add(startProcessCmd);
+					ServiceStartEvent event = new ServiceStartEvent();
+					String result = Utils.execP(commands);
+					event.setErrorMessage(result);
+					EventBus.getDefault().post(event);
 				}
 			}.start();
+		}else if (getRTService() != null) {
+			mBrowerApkFileBtn.setVisibility(View.VISIBLE);
+			mStatusText.append("qh_root_service already started.\n");
+		} else {
+			mStatusText.append("this device does not supported!\n");
 		}
 	}
 	
 	public void onEventMainThread(ServiceStartEvent event) {
-		IRootService rtService = getRTService();
-		if (rtService == null) {
-			mStatusText.append("服务启动失败!\n");
-		}else {
+		if ("success".equals(event.getErrorMessage()) && getRTService() != null) {
 			mBrowerApkFileBtn.setVisibility(View.VISIBLE);
-			mStatusText.append("服务启动成功!\n");
+			mStatusText.append("start qh_root_service_success!\n");
+		}else {
+			mStatusText.append("start qh_root_service failed!\n");
 		}
     }
 	

@@ -18,6 +18,8 @@ package com.qihoo.rtservice;
 
 import java.io.File;
 
+import com.qihoo.constant.Constants;
+
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -25,10 +27,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 public class IRTServiceImpl extends IRootService.Stub {
-	private static final String TAG = IRTServiceImpl.class.getSimpleName();
 	public static final String SERVICE_NAME = "qh_root_service";
 	public static void main(String[] args) {
-		Log.e(TAG, "main function");
+		Log.e(Constants.TAG, "main function");
 		IRTServiceImpl service = new IRTServiceImpl();
 		ServiceManager.addService(SERVICE_NAME, service);
 		Looper.prepareMainLooper();
@@ -36,23 +37,23 @@ public class IRTServiceImpl extends IRootService.Stub {
 	}
 
 	public String exec(String[] args) {
-		Log.e(TAG, "exec function called.");
+		Log.e(Constants.TAG, "exec function called.");
 		return null;
 	}
 
 	@Override
 	public int stop() throws RemoteException {
-		Log.e(TAG, "stop function called.");
+		Log.e(Constants.TAG, "stop function called.");
 		return 0;
 	}
 
 	@Override
 	public boolean install(String path) throws RemoteException {
-		String[] command = new String[]{Utils.getShPath(), "-c", "pm install -r " + path};
-		String result = Utils.exec(new File("/"), null, command);
-		if (TextUtils.isEmpty(result) == false 
-				&& result.indexOf("success") != -1)
-			return true;
+//		String[] command = new String[]{Utils.getShPath(), "-c", "pm install -r " + path};
+//		String result = Utils.exec(new File("/"), null, command);
+//		if (TextUtils.isEmpty(result) == false 
+//				&& result.indexOf("success") != -1)
+//			return true;
 		return false;
 	}
 }
