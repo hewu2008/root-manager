@@ -19,7 +19,6 @@ package com.qihoo.permmgr;
 import android.content.Context;
 
 import com.qihoo.rtservice.NativeHelper;
-import com.uucun.root.MainActivity;
 
 public class LocalRoot {
 	private static LocalRoot mInstance = null;

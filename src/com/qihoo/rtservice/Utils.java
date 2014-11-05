@@ -65,7 +65,7 @@ public class Utils {
 			"/system/bin/su",
 			"/system/xbin/su", };
 	
-	public static String exec(File dir, String[] command) {
+	public static String exec(File dir, String classPath, String[] command) {
 		Process process = null;
 		DataOutputStream os = null;
 		String result = "";
@@ -75,7 +75,7 @@ public class Utils {
 			pb.redirectErrorStream(true);
 			pb.directory(dir);
 			Map<String, String> env = pb.environment();
-			env.put("CLASSPATH", "/data/local/com.qihoo.appstore-2.apk");
+			if (classPath != null) env.put("CLASSPATH", classPath);
 			process = pb.start();
 			process.waitFor();
 			result = Utils.readStream(process.getInputStream());

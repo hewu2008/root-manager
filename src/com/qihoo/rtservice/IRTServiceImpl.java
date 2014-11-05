@@ -49,7 +49,7 @@ public class IRTServiceImpl extends IRootService.Stub {
 	@Override
 	public boolean install(String path) throws RemoteException {
 		String[] command = new String[]{Utils.getShPath(), "-c", "pm install -r " + path};
-		String result = Utils.exec(new File("/"), command);
+		String result = Utils.exec(new File("/"), null, command);
 		if (TextUtils.isEmpty(result) == false 
 				&& result.indexOf("success") != -1)
 			return true;

@@ -12,10 +12,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.qihoo.appstore.R;
+import com.qihoo.event.ServiceStartEvent;
 import com.qihoo.permmgr.LocalRoot;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
 import com.qihoo.rtservice.Utils;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (C) 2014-2015 hewu <hewu2008@gmail.com>
@@ -70,10 +73,10 @@ public class MainActivity extends Activity {
 						e.printStackTrace();
 						mStatusText.setText("静默安装异常:" + e.getMessage() + "\n");
 					}
-					
 				}
 			}
 		});
+		EventBus.getDefault().register(this);
 	}
 	
 	private void load360Library() {
@@ -84,13 +87,30 @@ public class MainActivity extends Activity {
 	
 	private void startRootService() {
 		if (Utils.hasSuCmd() && getRTService() == null) {
-			String servicePath = IRTServiceImpl.class.getName();
-			String startServiceCmd = String.format("app_process /system/bin %s --nice-name=%s --application", 
-					servicePath, IRTServiceImpl.SERVICE_NAME);
-			Utils.exec(getFilesDir().getParentFile(), new String[] {Utils.getSuPath(), "-c", startServiceCmd});
-			mBrowerApkFileBtn.setVisibility(View.VISIBLE);
+			mStatusText.append("正在启动后台ROOT服务...\n");
+			new Thread() {
+				@Override 
+				public void run() {
+					String servicePath = IRTServiceImpl.class.getName();
+					String startServiceCmd = String.format("app_process /system/bin %s --nice-name=%s --application", 
+						servicePath, IRTServiceImpl.SERVICE_NAME);
+					String classPath = MainActivity.this.getPackageCodePath();
+					Utils.exec(getFilesDir().getParentFile(), classPath, new String[] {Utils.getSuPath(), "-c", startServiceCmd});
+					EventBus.getDefault().post(new ServiceStartEvent());
+				}
+			}.start();
 		}
 	}
+	
+	public void onEventMainThread(ServiceStartEvent event) {
+		IRootService rtService = getRTService();
+		if (rtService == null) {
+			mStatusText.append("服务启动失败!\n");
+		}else {
+			mBrowerApkFileBtn.setVisibility(View.VISIBLE);
+			mStatusText.append("服务启动成功!\n");
+		}
+    }
 	
 	public static IRootService getRTService() {
 		IBinder binder = ServiceManager.getService(IRTServiceImpl.SERVICE_NAME);
