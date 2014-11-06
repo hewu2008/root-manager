@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.qihoo.appstore.R;
 import com.qihoo.constant.Constants;
+import com.qihoo.event.InstallFinishEvent;
 import com.qihoo.event.ServiceStartEvent;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
@@ -109,12 +110,16 @@ public class MainActivity extends Activity {
 	}
 	
 	public void onEventMainThread(ServiceStartEvent event) {
-		if ("success".equals(event.getErrorMessage()) && getRTService() != null) {
+		if ("success".equals(event.getErrorMessage())) {
 			mBrowerApkFileBtn.setVisibility(View.VISIBLE);
-			mStatusText.append("start qh_root_service_success!\n");
+			mStatusText.append("call qh_root_service command success!\n");
 		}else {
-			mStatusText.append("start qh_root_service failed!\n");
+			mStatusText.append("call qh_root_service command failed!\n");
 		}
+    }
+	
+	public void onEventMainThread(InstallFinishEvent event) {
+		mStatusText.append("install result: " + event.getResult() + "\n");
     }
 	
 	public static IRootService getRTService() {
@@ -141,19 +146,29 @@ public class MainActivity extends Activity {
 		case FILE_SELECT_CODE:
 			if (resultCode == RESULT_OK) {
 				Uri uri = data.getData();
-				String path = FileUtils.getPath(this, uri);
+				final String path = FileUtils.getPath(this, uri);
 				Log.d(Constants.TAG, "path:" + path);
 				if (path == null) return;
-				IRootService rtService = getRTService();
+				final IRootService rtService = getRTService();
 				File file = new File(path);
 				if (file.exists() == true && rtService != null) {
-					try {
-						boolean bRet = rtService.install(path);
-						mStatusText.setText("install result:" + bRet + "\n");
-					} catch (RemoteException e) {
-						e.printStackTrace();
-						mStatusText.setText("install result:" + e.getMessage() + "\n");
-					}
+					mStatusText.append("installing...\n");
+					new Thread() {
+						@Override
+						public void run() {
+							try {
+								boolean bRet = rtService.install(path);
+								InstallFinishEvent event = new InstallFinishEvent();
+								event.setResult(String.valueOf(bRet));
+								EventBus.getDefault().post(event);
+							} catch (RemoteException e) {
+								e.printStackTrace();
+								InstallFinishEvent event = new InstallFinishEvent();
+								event.setResult(e.getMessage());
+								EventBus.getDefault().post(event);
+							}
+						}
+					}.start();
 				}
 			}
 			break;
