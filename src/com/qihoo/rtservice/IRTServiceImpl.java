@@ -16,15 +16,13 @@
  */
 package com.qihoo.rtservice;
 
-import java.io.File;
-
-import com.qihoo.constant.Constants;
-
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.qihoo.constant.Constants;
 
 public class IRTServiceImpl extends IRootService.Stub {
 	public static final String SERVICE_NAME = "qh_root_service";
@@ -49,11 +47,11 @@ public class IRTServiceImpl extends IRootService.Stub {
 
 	@Override
 	public boolean install(String path) throws RemoteException {
-//		String[] command = new String[]{Utils.getShPath(), "-c", "pm install -r " + path};
-//		String result = Utils.exec(new File("/"), null, command);
-//		if (TextUtils.isEmpty(result) == false 
-//				&& result.indexOf("success") != -1)
-//			return true;
+		String command = "pm install -r " + path;
+		String result = Utils.exec(command);
+		if (TextUtils.isEmpty(result) == false 
+				&& result.indexOf("success") != -1)
+			return true;
 		return false;
 	}
 }

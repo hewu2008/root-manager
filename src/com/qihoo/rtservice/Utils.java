@@ -85,7 +85,45 @@ public class Utils {
 			if (process.exitValue() == 0) {
 				result = "success";
 			}else {
-				result = Utils.readStream(process.getErrorStream());
+				result = "failed";
+			}
+			return result;
+		} catch (Exception e) {
+			Log.e(Constants.TAG, "Failed to run command", e);
+			return result;
+		} finally {
+			if (os != null)
+				try {
+					os.close();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			if (process != null) {
+				try {
+					process.exitValue();
+				} catch (IllegalThreadStateException e) {
+					process.destroy();
+				}
+			}
+		}
+	}
+	
+	public static String exec(String command)
+	{
+		Process process = null;
+		DataOutputStream os = null;
+		String result = "";
+		try {
+			process = Runtime.getRuntime().exec(command);
+			os = new DataOutputStream(process.getOutputStream());
+			os.writeBytes("echo \"rc:\" $?\n");
+			os.writeBytes("exit\n");
+			os.flush();
+			process.waitFor();
+			if (process.exitValue() == 0) {
+				result = "success";
+			}else {
+				result = "failed";
 			}
 			return result;
 		} catch (Exception e) {

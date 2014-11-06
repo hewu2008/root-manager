@@ -5,19 +5,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.qihoo.appstore.R;
+import com.qihoo.constant.Constants;
 import com.qihoo.event.ServiceStartEvent;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
 import com.qihoo.rtservice.Utils;
+import com.qihoo.utils.FileUtils;
 
 import de.greenrobot.event.EventBus;
 
@@ -41,7 +47,7 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends Activity {
 	private TextView mStatusText = null;
 	private Button mBrowerApkFileBtn = null;
-	private static final String apkfile = "mnt/sdcard/UCDownloads/htc_market.apk";
+	private static final int FILE_SELECT_CODE = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,17 +69,13 @@ public class MainActivity extends Activity {
 		mBrowerApkFileBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				File file = new File(apkfile);
 				IRootService rtService = getRTService();
-				if (file.exists() == true && rtService != null) {
-					try {
-						boolean bRet = rtService.install(apkfile);
-						mStatusText.setText("install result:" + bRet + "\n");
-					} catch (RemoteException e) {
-						e.printStackTrace();
-						mStatusText.setText("install result:" + e.getMessage() + "\n");
-					}
-				}
+				if (rtService != null) {
+					showFileChooser();
+				} else {
+					Toast.makeText(MainActivity.this, 
+						"qh_root_service process not started.", Toast.LENGTH_SHORT).show();
+				} 
 			}
 		});
 		EventBus.getDefault().register(this);
@@ -120,5 +122,42 @@ public class MainActivity extends Activity {
 		if (binder != null)
 			return IRootService.Stub.asInterface(binder);
 		return null;
+	}
+	
+	private void showFileChooser() {
+	    Intent intent = new Intent(Intent.ACTION_GET_CONTENT); 
+	    intent.setType("application/vnd.android.package-archive"); 
+	    intent.addCategory(Intent.CATEGORY_OPENABLE);
+	    try {
+	        startActivityForResult(Intent.createChooser(intent, "select apk file"), FILE_SELECT_CODE);
+	    } catch (android.content.ActivityNotFoundException ex) {
+	        Toast.makeText(this, "Please install a File Manager.",  Toast.LENGTH_SHORT).show();
+	    }
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case FILE_SELECT_CODE:
+			if (resultCode == RESULT_OK) {
+				Uri uri = data.getData();
+				String path = FileUtils.getPath(this, uri);
+				Log.d(Constants.TAG, "path:" + path);
+				if (path == null) return;
+				IRootService rtService = getRTService();
+				File file = new File(path);
+				if (file.exists() == true && rtService != null) {
+					try {
+						boolean bRet = rtService.install(path);
+						mStatusText.setText("install result:" + bRet + "\n");
+					} catch (RemoteException e) {
+						e.printStackTrace();
+						mStatusText.setText("install result:" + e.getMessage() + "\n");
+					}
+				}
+			}
+			break;
+		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 }
