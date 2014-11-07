@@ -55,4 +55,30 @@ public class NativeHelper {
 		}
 		return null;
 	}
+	
+	public static String copyNativeElf(Context paramContext, String elfFile) {
+		// 检查文件是否是否存在
+		File outFile = new File("/data/local/tmp");
+		if (outFile.exists() == true) 
+			return outFile.getAbsolutePath();
+		try {
+			// 拷贝asset下的库文件至指定的目录
+			InputStream is  = paramContext.getAssets().open(elfFile);
+			OutputStream dbOut = new FileOutputStream(outFile.getAbsolutePath());
+			byte[] buffer = new byte[1024];
+			int length;
+			while ((length = is.read(buffer)) > 0) {
+				dbOut.write(buffer, 0, length);
+			}
+			dbOut.flush();
+			dbOut.close();
+			is.close();
+			// 赋可执行权限
+			Runtime.getRuntime().exec("chmod 755 " + outFile.getPath()).waitFor();
+			return outFile.getPath();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

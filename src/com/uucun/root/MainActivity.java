@@ -110,11 +110,11 @@ public class MainActivity extends Activity {
 		intent.addCategory(Intent.CATEGORY_OPENABLE);
 		try {
 			startActivityForResult(
-					Intent.createChooser(intent, "select apk file"),
-					FILE_SELECT_CODE);
+				Intent.createChooser(intent, "select apk file"),
+				FILE_SELECT_CODE);
 		} catch (android.content.ActivityNotFoundException ex) {
 			Toast.makeText(this, "Please install a File Manager.",
-					Toast.LENGTH_SHORT).show();
+				Toast.LENGTH_SHORT).show();
 		}
 	}
 

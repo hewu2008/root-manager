@@ -38,6 +38,7 @@ public class LocalRoot {
 		String libPath = NativeHelper.copyNativeLib(context, "permmgr/lib360.so");
 		NativeHelper.copyNativeLib(context, "permmgr/Libpermc.so");
 		NativeHelper.copyNativeLib(context, "permmgr/libsu.so");
+		NativeHelper.copyNativeElf(context, "libroot");
 		System.load(libPath);
 		int nRet = jmain(1);
 		return nRet;
