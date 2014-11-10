@@ -40,7 +40,8 @@ public class LocalRoot {
 		NativeHelper.copyNativeLib(context, "permmgr/libsu.so");
 		NativeHelper.copyNativeElf(context, "libroot");
 		System.load(libPath);
-		int nRet = jmain(1);
+		int nRet = jmain(0);
+		junmain(getClass());
 		return nRet;
 	}
 }

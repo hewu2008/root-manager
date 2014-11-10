@@ -16,14 +16,25 @@
  */
 package com.qihoo.permmgr;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.qihoo.permmgr.util.b;
+import com.qihoo.permmgr.util.d;
+import com.qihoo.permmgr.util.g;
+
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.Process;
+import android.text.TextUtils;
+import android.util.Log;
 
 public class PermManager {
 	private static final int ACT_FAILBYSU = 3;
@@ -90,8 +101,169 @@ public class PermManager {
 	private int resultcode = -1;
 	private PowerManager.WakeLock wakeLock = null;
 	
+	private PermManager(Context context) {
+		this.mContext = context;
+		try {
+			File localFile = new File(this.mContext.getFilesDir().getAbsolutePath() + this.mBaseLibiPath);
+			if (localFile.exists())
+				localFile.delete();
+			checkFiles();
+			this.prefs = context.getSharedPreferences("permmgr", 0);
+		} catch (Exception localException) {
+			localException.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 改变permmgr.xml为root权限
+	 */
+	private void changeUidToMyReal() {
+		int i = this.mMyRealUid;
+		try {
+			if (Process.myUid() == 0) {
+				File localFile = new File("/data/data/" + this.mContext.getPackageName() + "/shared_prefs/");
+				String[] arrayOfString = new String[3];
+				arrayOfString[0] = "chown";
+				arrayOfString[1] = (i + "." + i);
+				arrayOfString[2] = "permmgr.xml";
+				com.qihoo.permmgr.util.b.a(localFile, arrayOfString);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private boolean checkFileByPath(String paramString) {
+		File localFile = new File(this.mContext.getFilesDir().getAbsolutePath()
+				+ "/permmgr/" + paramString);
+		if ((localFile.exists()) && (checkFileSize(paramString, localFile))) {
+			Log.d("PermManager:checkFileByPath", "file is normal");
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 检查文件数量，操作15个文件需要删除多余文件
+	 */
+	private void checkFileNum() {
+		File localFile = new File(this.mContext.getFilesDir().getAbsolutePath() + "/permmgr");
+		File[] arrayOfFile = new File[]{};
+		if (localFile.exists()) {
+			arrayOfFile = localFile.listFiles();
+			if (arrayOfFile.length <= 15)
+				return;
+		}
+	}
+	
+	/** 
+	 * 检查asset/permmgr目录与程序目录下的文件大小是否一致
+	 */
+	private boolean checkFileSize(String paramString, File paramFile) {
+		AssetManager assetManager = mContext.getAssets();
+		try {
+			InputStream is = assetManager.open("permmgr/" + paramString);
+			if (is.available() == paramFile.length()) {
+				return true;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * 检查root服务是否存在
+	 */
+	private boolean checkRT_server(c paramc) {
+		if (paramc != null) {
+			return paramc.onCheckRootServerExist();
+		}
+		return false;
+	}
+	
+	/**
+	 * 更新permManager
+	 */
+	private void checkUpdate() {
+	    new Thread(new UpdateRunnable()).start();
+	}
+	
+	private void cleanFutext() {
+		String str = this.prefs.getString("successSolution", "");
+		if ((!TextUtils.isEmpty(str))
+				&& ((str.equalsIgnoreCase("53b3a16759d31c1253e137e4"))
+						|| (str.equalsIgnoreCase("53b2a92d59d31c1253e137e2"))
+						|| (str.equalsIgnoreCase("53ba781759d3727902183a3f"))
+						|| (str.equalsIgnoreCase("53b22b96e4b0847d8a6d9fcc"))
+						|| (str.equalsIgnoreCase("53bbf2aae4b0dc36d1b8e0d7")) 
+						|| (str.equalsIgnoreCase("53c62d3fe4b0a822654c1792")))) {
+			File localFile = new File(this.mContext.getFilesDir()
+					.getAbsolutePath() + "/permmgr/" + str);
+			if ((localFile != null) && (localFile.exists())) {
+				this.prefs.edit().remove("successSolution").commit();
+				localFile.delete();
+				Log.d("PermManager", "cleanFutext");
+			}
+		}
+	}
+	
+	/**
+	 * 执行jdocommand命令并返回结果
+	 */
+	private String doCommandNoErr(String paramString1, String paramString2) {
+		checkUpdate();
+		OutInfo outInfo = (OutInfo)jdocommand(this.mInfo, paramString1, 30);
+		return outInfo.out;
+	}
+		
+	private int doSolutionBySU(String paramString, c paramc) {
+		if (isHaveSu) {
+			new Thread(new CheckSuRunnable()).start();
+			g instance = g.a(mContext);
+			int paramInt1 = 22;
+			int paramInt2 = 3000;
+			int paramInt3 = 1;
+			String paramString1 = "";
+			int paramInt4 = 203;
+			String paramString2 = "";
+			instance.a(mContext, paramInt1, paramInt2, paramInt3, paramString1, paramInt4, paramString2);
+			paramc.onCheckRootServerExist();
+		}
+		return 0;
+	}
+	
+	private int doSolutionOnline(String paramString, c paramc)
+	  {
+	    Log.d("doSolutionOnline", "[*] online");
+	    // 写入机型信息至permmgr中
+	    // e.b("3", new File("/mnt/sdcard/360/permmgr"));
+	    if (!d.a(this.mContext))
+	    {
+	      Log.d("doSolutionOnline", "----doroot online net not conncet----");
+	      return 3025;
+	    }
+	    if ((!this.mIsSupport) && (!this.mIsSupportByPC))
+	      return -1000;
+	    if ((!this.mIsSupport) && (this.mIsSupportByPC))
+	      return 3026;
+	    g.a(this.mContext).a(this.mContext, 21, 0, -1, "0", 300, "do online solution");
+	    int i = RootMan.a(this.mContext).a();
+	    if ((i == 3000) && (!checkRT_server(paramc)))
+	    {
+	      i = 3046;
+	      Log.d("doSolutionOnline", "3000 but service not running");
+	    }
+	    this.resultcode = i;
+	    reportStat(this.resultcode, 2, 1000);
+	    Log.d("doSolutionOnline", "[*] end");
+	    return this.resultcode;
+	  }
+	
 	private native Object jcheckdaemon(Object object);
+	
 	private native Object jdocommand(Object object, String paramString, int paramInt);
+	
 	private native int jrestartdaemon(String paramString);
 	
 	class OutInfo {
@@ -101,6 +273,93 @@ public class PermManager {
 		private String version;
 
 		OutInfo(PermManager paramPermManager) {
+		}
+	}
+	
+	class UpdateRunnable implements Runnable
+	{
+	  public void run()
+	  {
+//	    if (PermManager.access$0(this.this$0) == null)
+//	      PermManager.access$2(this.this$0, PermManager.access$1(this.this$0).getSharedPreferences("permmgr", 0));
+//	    if (System.currentTimeMillis() - PermManager.access$0(this.this$0).getLong("checklasttime", 0L) < 86400000L);
+//	    do
+//	      return;
+//	    while (PermManager.access$3(this.this$0));
+//	    try
+//	    {
+//	      boolean bool = d.a(PermManager.access$1(this.this$0));
+//	      if (!bool)
+//	        return;
+//	      PermManager.access$4(this.this$0, true);
+//	      String str1 = d.a(PermManager.access$5(this.this$0), 10000);
+//	      e.a("updatabegin--vvv--" + str1);
+//	      PermManager.ConfigInfo localConfigInfo1 = PermManager.ConfigInfo.loadFromString(str1, PermManager.access$1(this.this$0));
+//	      if ((localConfigInfo1 != null) && (localConfigInfo1.apkVersion > PermManager.access$0(this.this$0).getInt("check_version_client", 0)))
+//	      {
+//	        String str4 = PermManager.access$1(this.this$0).getFilesDir().getAbsolutePath() + PermManager.access$6(this.this$0);
+//	        d.a(localConfigInfo1.apkUrl, 60000, str4);
+//	        com.qihoo.permmgr.util.b.b("chmod 755 " + str4);
+//	        PermManager.access$0(this.this$0).edit().putInt("check_version_client", localConfigInfo1.apkVersion);
+//	      }
+//	      String str2 = d.a(PermManager.access$7(this.this$0), 10000);
+//	      e.a("updatabegin--vvv--" + str2);
+//	      if (localConfigInfo1 != null)
+//	        localConfigInfo1.clean(localConfigInfo1);
+//	      PermManager.ConfigInfo localConfigInfo2 = PermManager.ConfigInfo.loadFromString(str2, PermManager.access$1(this.this$0));
+//	      if ((localConfigInfo2 != null) && (localConfigInfo2.apkVersion > PermManager.access$0(this.this$0).getInt("check_version_libsu", 0)))
+//	      {
+//	        String str3 = PermManager.access$1(this.this$0).getFilesDir().getAbsolutePath() + PermManager.access$8(this.this$0);
+//	        d.a(localConfigInfo2.apkUrl, 60000, str3);
+//	        com.qihoo.permmgr.util.b.b("chmod 755 " + str3);
+//	        PermManager.access$0(this.this$0).edit().putInt("check_version_libsu", localConfigInfo2.apkVersion);
+//	      }
+//	      PermManager.access$0(this.this$0).edit().putLong("checklasttime", System.currentTimeMillis()).commit();
+//	      PermManager.access$4(this.this$0, false);
+//	      return;
+//	    }
+//	    catch (ParseException localParseException)
+//	    {
+//	      PermManager.access$4(this.this$0, false);
+//	      if (b.a)
+//	        localParseException.printStackTrace();
+//	      return;
+//	    }
+//	    catch (IOException localIOException)
+//	    {
+//	      PermManager.access$4(this.this$0, false);
+//	      if (b.a)
+//	        localIOException.printStackTrace();
+//	      return;
+//	    }
+//	    catch (Exception localException)
+//	    {
+//	      PermManager.access$4(this.this$0, false);
+//	      if (b.a)
+//	        localException.printStackTrace();
+//	      return;
+//	    }
+//	    finally
+//	    {
+//	      PermManager.access$4(this.this$0, false);
+//	    }
+//	    throw localObject;
+	  }
+	}
+	
+	class CheckSuRunnable implements Runnable {
+		public void run() {
+			try {
+				out = b.a(new File(mContext.getFilesDir().getAbsolutePath()
+						+ "/permmgr/"), "chmod 755 " + mContext.getFilesDir().getAbsolutePath() + "/permmgr/libsu.so;" 
+					    + mContext.getFilesDir().getAbsolutePath() + "/permmgr/libsu.so &");
+				Log.d("run", "su out----" + out);
+				if ((!TextUtils.isEmpty(out)) && ((out.contains("denied")) || (out.contains("unallowed"))))
+					mRefuseByUser = true;
+			} catch (Exception localException) {
+				isHaveSu = false;
+				Log.d("run", "[-] su not exists");
+			}
 		}
 	}
 }
