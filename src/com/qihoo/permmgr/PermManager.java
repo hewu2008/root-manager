@@ -22,9 +22,13 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.net.ParseException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -222,6 +226,74 @@ public class PermManager {
 		OutInfo info = (OutInfo)jcheckdaemon(this.mInfo);
 		return info.running >= 0;
 	}
+	
+	/**
+	 * 检查是否支持saferoot
+	 * Map
+	 */
+	public Map checkIsSupportForSafe(String paramString, boolean paramBoolean)
+	  {
+	    HashMap localHashMap = new HashMap();
+	    if (this.prefs == null) this.prefs = this.mContext.getSharedPreferences("permmgr", 0);
+	    // 检查是否曾经root过
+	    if ((System.currentTimeMillis() - this.prefs.getLong("checksupportlasttime", 0L) < 7200000L) && (!paramBoolean))
+	    {
+	      localHashMap.clear();
+	      localHashMap.put("mobile", Integer.valueOf(this.prefs.getInt("checksupportresult", 0)));
+	      localHashMap.put("pc", Integer.valueOf(this.prefs.getInt("checksupportresultforpc", 0)));
+	      localHashMap.put("err", Integer.valueOf(100));
+	      return localHashMap;
+	    }
+	    // 检查是否有网络连接
+	    if (!com.qihoo.permmgr.util.d.a(this.mContext))
+	    {
+	      localHashMap.clear();
+	      localHashMap.put("mobile", Integer.valueOf(0));
+	      localHashMap.put("pc", Integer.valueOf(0));
+	      localHashMap.put("err", Integer.valueOf(101));
+	      return localHashMap;
+	    }
+	    try
+	    {
+	      String str = d.a(RootMan.a(this.mContext).a(paramString, 1), 10000);
+	      if (str == null)
+	      {
+	        localHashMap.clear();
+	        localHashMap.put("mobile", Integer.valueOf(0));
+	        localHashMap.put("pc", Integer.valueOf(0));
+	        localHashMap.put("err", Integer.valueOf(102));
+	        return localHashMap;
+	      }
+	    }
+	    catch (ParseException localParseException)
+	    {
+	      String str;
+	      localHashMap.clear();
+	      localHashMap.put("mobile", Integer.valueOf(0));
+	      localHashMap.put("pc", Integer.valueOf(0));
+	      localHashMap.put("err", Integer.valueOf(103));
+	      return localHashMap;
+	      JSONObject localJSONObject = new JSONObject(str);
+	      int i = localJSONObject.getInt("mobile");
+	      int j = localJSONObject.getInt("pc");
+	      this.prefs.edit().putLong("checksupportlasttime", System.currentTimeMillis()).commit();
+	      this.prefs.edit().putInt("checksupportresult", i).commit();
+	      this.prefs.edit().putInt("checksupportresultforpc", j).commit();
+	      localHashMap.clear();
+	      localHashMap.put("mobile", Integer.valueOf(i));
+	      localHashMap.put("pc", Integer.valueOf(j));
+	      localHashMap.put("err", Integer.valueOf(100));
+	      return localHashMap;
+	    }
+	    catch (IOException localIOException)
+	    {
+	        localIOException.printStackTrace();
+	    }
+	    catch (JSONException localJSONException)
+	    {
+	        localJSONException.printStackTrace();
+	    }
+	  }
 		
 //	private int doSolutionBySU(String paramString, c paramc) {
 //		if (isHaveSu) {
