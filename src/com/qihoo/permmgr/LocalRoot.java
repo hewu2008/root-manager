@@ -16,6 +16,8 @@
  */
 package com.qihoo.permmgr;
 
+import java.io.File;
+
 import android.content.Context;
 
 import com.qihoo.rtservice.NativeHelper;
@@ -33,15 +35,44 @@ public class LocalRoot {
 	private native int jmain(int paramInt);
 
 	private native void junmain(Class<?> paramClass);
-	
+
 	public int doRoot(Context context) {
-		String libPath = NativeHelper.copyNativeLib(context, "permmgr/lib360.so");
+		String libPath = NativeHelper.copyNativeLib(context,
+				"permmgr/lib360.so");
 		NativeHelper.copyNativeLib(context, "permmgr/Libpermc.so");
 		NativeHelper.copyNativeLib(context, "permmgr/libsu.so");
 		NativeHelper.copyNativeElf(context, "libroot");
 		System.load(libPath);
 		int nRet = jmain(0);
 		junmain(getClass());
+		return nRet;
+	}
+	
+	/**
+	 * 动态库的路径
+	 */
+	public int doRoot(java.lang.String paramString, android.content.SharedPreferences paramSharedPreferences, c paramc) {
+		System.load(paramString);
+		int nRet = jmain(0);
+		junmain(getClass());
+		if (nRet != 3059 || paramc == null) {
+			File file = new File(paramString);
+			if (true == file.exists()) file.delete();
+			return nRet;
+		}
+		for (int i = 0; i < 10; ++i) {
+			if (paramc.onCheckRootServerExist() == true) {
+				File file = new File(paramString);
+				if (true == file.exists()) file.delete();
+				return nRet;
+			}
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		nRet = -2000;
 		return nRet;
 	}
 }
