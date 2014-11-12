@@ -15,9 +15,9 @@
 
     <application
         android:allowBackup="true"
+        android:debuggable="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:debuggable="true"
         android:theme="@android:style/Theme.Holo" >
         <activity
             android:name="com.uucun.root.MainActivity"
@@ -29,6 +29,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name="com.qihoo.permmgr.PermService"
+            android:exported="false"
+            android:process=":permmgr" />
     </application>
 
 </manifest>
