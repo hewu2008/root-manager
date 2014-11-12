@@ -214,6 +214,14 @@ public class PermManager {
 		OutInfo outInfo = (OutInfo)jdocommand(this.mInfo, paramString1, 30);
 		return outInfo.out;
 	}
+	
+	/**
+	 * 检查daemon是否处于运行状态
+	 */
+	public boolean checkDaemonIsRunning() {
+		OutInfo info = (OutInfo)jcheckdaemon(this.mInfo);
+		return info.running >= 0;
+	}
 		
 //	private int doSolutionBySU(String paramString, c paramc) {
 //		if (isHaveSu) {

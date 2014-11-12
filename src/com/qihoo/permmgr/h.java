@@ -27,28 +27,23 @@ class h extends f {
 	}
 
 	public boolean checkDaemonIsRunning() {
-		// return PermManager.getInstance((Context) localObject).checkDaemonIsRunning();
-		return true;
+		return PermManager.getInstance((Context) localObject).checkDaemonIsRunning();
 	}
 
 	public Map checkIsSupportForSafe(String paramString, boolean paramBoolean) {
-		// return PermManager.getInstance((Context) localObject).checkIsSupportForSafe(paramString, paramBoolean);
-		return null;
+		return PermManager.getInstance((Context) localObject).checkIsSupportForSafe(paramString, paramBoolean);
 	}
 
 	public Map doCommand(String paramString1, String paramString2) {
-		// return PermManager.getInstance((Context) localObject).doCommand(paramString1, paramString2);
-		return null;
+		return PermManager.getInstance((Context) localObject).doCommand(paramString1, paramString2);
 	}
 
 	public int getRootForSafe(String paramString, boolean paramBoolean,
 			Bundle paramBundle, c paramc) {
-		// return PermManager.getInstance((Context) localObject).getRoot(paramString, paramBoolean, paramBundle, paramc);
-		return 0;
+		return PermManager.getInstance((Context) localObject).getRoot(paramString, paramBoolean, paramBundle, paramc);
 	}
 
 	public int getVersion() {
-		// return Integer.parseInt(PermManager.getInstance((Context) localObject).getDaemonVersion());
-		return 0;
+		return Integer.parseInt(PermManager.getInstance((Context) localObject).getDaemonVersion());
 	}
 }
