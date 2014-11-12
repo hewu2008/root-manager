@@ -264,6 +264,20 @@ public class PermManager {
 	
 	private native int jrestartdaemon(String paramString);
 	
+	protected String getErrKey() {
+		return "err";
+	}
+
+	protected String getOutKey() {
+		return "out";
+	}
+	
+	public static PermManager getInstance(Context paramContext) {
+		if (mInstance == null)
+			mInstance = new PermManager(paramContext);
+		return mInstance;
+	}
+	
 	class OutInfo {
 		private int err;
 		private String out;
