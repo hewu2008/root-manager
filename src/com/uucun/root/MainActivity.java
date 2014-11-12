@@ -20,7 +20,7 @@ import android.widget.Toast;
 
 import com.qihoo.appstore.R;
 import com.qihoo.constant.Constants;
-import com.qihoo.permmgr.LocalRoot;
+import com.qihoo.permmgr.RootMan;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
 import com.qihoo.rtservice.Utils;
@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
 	}
 	
 	private int doRoot() {
-		LocalRoot root = LocalRoot.getInstance();
+		RootMan root = RootMan.getInstance();
 		return root.doRoot(this);
 	}
 

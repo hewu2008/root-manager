@@ -22,10 +22,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.qihoo.permmgr.util.b;
-import com.qihoo.permmgr.util.d;
-import com.qihoo.permmgr.util.g;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
@@ -35,6 +31,8 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.qihoo.permmgr.util.b;
 
 public class PermManager {
 	private static final int ACT_FAILBYSU = 3;
@@ -107,7 +105,7 @@ public class PermManager {
 			File localFile = new File(this.mContext.getFilesDir().getAbsolutePath() + this.mBaseLibiPath);
 			if (localFile.exists())
 				localFile.delete();
-			checkFiles();
+			// checkFiles();
 			this.prefs = context.getSharedPreferences("permmgr", 0);
 		} catch (Exception localException) {
 			localException.printStackTrace();
@@ -217,48 +215,48 @@ public class PermManager {
 		return outInfo.out;
 	}
 		
-	private int doSolutionBySU(String paramString, c paramc) {
-		if (isHaveSu) {
-			new Thread(new CheckSuRunnable()).start();
-			g instance = g.a(mContext);
-			int paramInt1 = 22;
-			int paramInt2 = 3000;
-			int paramInt3 = 1;
-			String paramString1 = "";
-			int paramInt4 = 203;
-			String paramString2 = "";
-			instance.a(mContext, paramInt1, paramInt2, paramInt3, paramString1, paramInt4, paramString2);
-			paramc.onCheckRootServerExist();
-		}
-		return 0;
-	}
-	
-	private int doSolutionOnline(String paramString, c paramc)
-	  {
-	    Log.d("doSolutionOnline", "[*] online");
-	    // 写入机型信息至permmgr中
-	    // e.b("3", new File("/mnt/sdcard/360/permmgr"));
-	    if (!d.a(this.mContext))
-	    {
-	      Log.d("doSolutionOnline", "----doroot online net not conncet----");
-	      return 3025;
-	    }
-	    if ((!this.mIsSupport) && (!this.mIsSupportByPC))
-	      return -1000;
-	    if ((!this.mIsSupport) && (this.mIsSupportByPC))
-	      return 3026;
-	    g.a(this.mContext).a(this.mContext, 21, 0, -1, "0", 300, "do online solution");
-	    int i = RootMan.a(this.mContext).a();
-	    if ((i == 3000) && (!checkRT_server(paramc)))
-	    {
-	      i = 3046;
-	      Log.d("doSolutionOnline", "3000 but service not running");
-	    }
-	    this.resultcode = i;
-	    reportStat(this.resultcode, 2, 1000);
-	    Log.d("doSolutionOnline", "[*] end");
-	    return this.resultcode;
-	  }
+//	private int doSolutionBySU(String paramString, c paramc) {
+//		if (isHaveSu) {
+//			new Thread(new CheckSuRunnable()).start();
+//			g instance = g.a(mContext);
+//			int paramInt1 = 22;
+//			int paramInt2 = 3000;
+//			int paramInt3 = 1;
+//			String paramString1 = "";
+//			int paramInt4 = 203;
+//			String paramString2 = "";
+//			instance.a(mContext, paramInt1, paramInt2, paramInt3, paramString1, paramInt4, paramString2);
+//			paramc.onCheckRootServerExist();
+//		}
+//		return 0;
+//	}
+//	
+//	private int doSolutionOnline(String paramString, c paramc)
+//	  {
+//	    Log.d("doSolutionOnline", "[*] online");
+//	    // 写入机型信息至permmgr中
+//	    // e.b("3", new File("/mnt/sdcard/360/permmgr"));
+//	    if (!d.a(this.mContext))
+//	    {
+//	      Log.d("doSolutionOnline", "----doroot online net not conncet----");
+//	      return 3025;
+//	    }
+//	    if ((!this.mIsSupport) && (!this.mIsSupportByPC))
+//	      return -1000;
+//	    if ((!this.mIsSupport) && (this.mIsSupportByPC))
+//	      return 3026;
+//	    g.a(this.mContext).a(this.mContext, 21, 0, -1, "0", 300, "do online solution");
+//	    int i = RootMan.a(this.mContext).a();
+//	    if ((i == 3000) && (!checkRT_server(paramc)))
+//	    {
+//	      i = 3046;
+//	      Log.d("doSolutionOnline", "3000 but service not running");
+//	    }
+//	    this.resultcode = i;
+//	    reportStat(this.resultcode, 2, 1000);
+//	    Log.d("doSolutionOnline", "[*] end");
+//	    return this.resultcode;
+//	  }
 	
 	private native Object jcheckdaemon(Object object);
 	

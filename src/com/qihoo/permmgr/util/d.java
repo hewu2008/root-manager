@@ -73,40 +73,6 @@ public class d {
 		return null;
 	}
 
-	public static void a(String paramString1, int paramInt, String paramString2) {
-		HttpGet localHttpGet = new HttpGet(paramString1);
-		DefaultHttpClient localDefaultHttpClient = new DefaultHttpClient();
-		localDefaultHttpClient.getParams().setParameter(
-				"http.connection.timeout", Integer.valueOf(paramInt));
-		localDefaultHttpClient.getParams().setParameter("http.socket.timeout",
-				Integer.valueOf(paramInt));
-		HttpResponse localHttpResponse = localDefaultHttpClient
-				.execute(localHttpGet);
-		InputStream localInputStream;
-		FileOutputStream localFileOutputStream;
-		byte[] arrayOfByte;
-		if (200 == localHttpResponse.getStatusLine().getStatusCode()) {
-			localInputStream = localHttpResponse.getEntity().getContent();
-			if (localInputStream != null) {
-				File localFile = new File(paramString2);
-				if (localFile.exists())
-					localFile.delete();
-				localFileOutputStream = new FileOutputStream(localFile);
-				arrayOfByte = new byte[8192];
-			}
-		}
-		while (true) {
-			int i = localInputStream.read(arrayOfByte);
-			if (i <= 0) {
-				localFileOutputStream.flush();
-				localFileOutputStream.close();
-				localInputStream.close();
-				return;
-			}
-			localFileOutputStream.write(arrayOfByte, 0, i);
-		}
-	}
-
 	public static boolean a(Context paramContext) {
 		try {
 			ConnectivityManager localConnectivityManager = (ConnectivityManager) paramContext
