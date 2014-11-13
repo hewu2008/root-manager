@@ -17,18 +17,16 @@
 package com.qihoo.permmgr;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
-import android.net.ParseException;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -233,66 +231,67 @@ public class PermManager {
 	 */
 	public Map checkIsSupportForSafe(String paramString, boolean paramBoolean)
 	  {
-	    HashMap localHashMap = new HashMap();
-	    if (this.prefs == null) this.prefs = this.mContext.getSharedPreferences("permmgr", 0);
-	    // 检查是否曾经root过
-	    if ((System.currentTimeMillis() - this.prefs.getLong("checksupportlasttime", 0L) < 7200000L) && (!paramBoolean))
-	    {
-	      localHashMap.clear();
-	      localHashMap.put("mobile", Integer.valueOf(this.prefs.getInt("checksupportresult", 0)));
-	      localHashMap.put("pc", Integer.valueOf(this.prefs.getInt("checksupportresultforpc", 0)));
-	      localHashMap.put("err", Integer.valueOf(100));
-	      return localHashMap;
-	    }
-	    // 检查是否有网络连接
-	    if (!com.qihoo.permmgr.util.d.a(this.mContext))
-	    {
-	      localHashMap.clear();
-	      localHashMap.put("mobile", Integer.valueOf(0));
-	      localHashMap.put("pc", Integer.valueOf(0));
-	      localHashMap.put("err", Integer.valueOf(101));
-	      return localHashMap;
-	    }
-	    try
-	    {
-	      String str = d.a(RootMan.a(this.mContext).a(paramString, 1), 10000);
-	      if (str == null)
-	      {
-	        localHashMap.clear();
-	        localHashMap.put("mobile", Integer.valueOf(0));
-	        localHashMap.put("pc", Integer.valueOf(0));
-	        localHashMap.put("err", Integer.valueOf(102));
-	        return localHashMap;
-	      }
-	    }
-	    catch (ParseException localParseException)
-	    {
-	      String str;
-	      localHashMap.clear();
-	      localHashMap.put("mobile", Integer.valueOf(0));
-	      localHashMap.put("pc", Integer.valueOf(0));
-	      localHashMap.put("err", Integer.valueOf(103));
-	      return localHashMap;
-	      JSONObject localJSONObject = new JSONObject(str);
-	      int i = localJSONObject.getInt("mobile");
-	      int j = localJSONObject.getInt("pc");
-	      this.prefs.edit().putLong("checksupportlasttime", System.currentTimeMillis()).commit();
-	      this.prefs.edit().putInt("checksupportresult", i).commit();
-	      this.prefs.edit().putInt("checksupportresultforpc", j).commit();
-	      localHashMap.clear();
-	      localHashMap.put("mobile", Integer.valueOf(i));
-	      localHashMap.put("pc", Integer.valueOf(j));
-	      localHashMap.put("err", Integer.valueOf(100));
-	      return localHashMap;
-	    }
-	    catch (IOException localIOException)
-	    {
-	        localIOException.printStackTrace();
-	    }
-	    catch (JSONException localJSONException)
-	    {
-	        localJSONException.printStackTrace();
-	    }
+//	    HashMap localHashMap = new HashMap();
+//	    if (this.prefs == null) this.prefs = this.mContext.getSharedPreferences("permmgr", 0);
+//	    // 检查是否曾经root过
+//	    if ((System.currentTimeMillis() - this.prefs.getLong("checksupportlasttime", 0L) < 7200000L) && (!paramBoolean))
+//	    {
+//	      localHashMap.clear();
+//	      localHashMap.put("mobile", Integer.valueOf(this.prefs.getInt("checksupportresult", 0)));
+//	      localHashMap.put("pc", Integer.valueOf(this.prefs.getInt("checksupportresultforpc", 0)));
+//	      localHashMap.put("err", Integer.valueOf(100));
+//	      return localHashMap;
+//	    }
+//	    // 检查是否有网络连接
+//	    if (!com.qihoo.permmgr.util.d.a(this.mContext))
+//	    {
+//	      localHashMap.clear();
+//	      localHashMap.put("mobile", Integer.valueOf(0));
+//	      localHashMap.put("pc", Integer.valueOf(0));
+//	      localHashMap.put("err", Integer.valueOf(101));
+//	      return localHashMap;
+//	    }
+//	    try
+//	    {
+//	      String str = d.a(RootMan.a(this.mContext).a(paramString, 1), 10000);
+//	      if (str == null)
+//	      {
+//	        localHashMap.clear();
+//	        localHashMap.put("mobile", Integer.valueOf(0));
+//	        localHashMap.put("pc", Integer.valueOf(0));
+//	        localHashMap.put("err", Integer.valueOf(102));
+//	        return localHashMap;
+//	      }
+//	    }
+//	    catch (ParseException localParseException)
+//	    {
+//	      String str;
+//	      localHashMap.clear();
+//	      localHashMap.put("mobile", Integer.valueOf(0));
+//	      localHashMap.put("pc", Integer.valueOf(0));
+//	      localHashMap.put("err", Integer.valueOf(103));
+//	      return localHashMap;
+//	      JSONObject localJSONObject = new JSONObject(str);
+//	      int i = localJSONObject.getInt("mobile");
+//	      int j = localJSONObject.getInt("pc");
+//	      this.prefs.edit().putLong("checksupportlasttime", System.currentTimeMillis()).commit();
+//	      this.prefs.edit().putInt("checksupportresult", i).commit();
+//	      this.prefs.edit().putInt("checksupportresultforpc", j).commit();
+//	      localHashMap.clear();
+//	      localHashMap.put("mobile", Integer.valueOf(i));
+//	      localHashMap.put("pc", Integer.valueOf(j));
+//	      localHashMap.put("err", Integer.valueOf(100));
+//	      return localHashMap;
+//	    }
+//	    catch (IOException localIOException)
+//	    {
+//	        localIOException.printStackTrace();
+//	    }
+//	    catch (JSONException localJSONException)
+//	    {
+//	        localJSONException.printStackTrace();
+//	    }
+		return null;
 	  }
 		
 //	private int doSolutionBySU(String paramString, c paramc) {
@@ -438,6 +437,53 @@ public class PermManager {
 //	    throw localObject;
 	  }
 	}
+	
+	 public void receiverAndWriteDataMobilesafe(Bundle paramBundle)
+	  {
+	    File localFile = new File(this.mContext.getFilesDir().getAbsoluteFile() + "/" + "env_file");
+	    if ((localFile != null) && (localFile.exists()))
+	      localFile.delete();
+	    int j = paramBundle.getInt("root_type", 0);
+	    
+	    int k = paramBundle.getInt("env_num", 0);
+	    String[] arrayOfString1 = new String[k];
+	    
+	    int n = paramBundle.getInt("arg_num", 0);
+	    String[] arrayOfString2 = new String[n];
+	 
+	    StringBuilder localStringBuilder = new StringBuilder();
+	    localStringBuilder.append("source=").append(this.mSourceType).append('\n');
+	    localStringBuilder.append('\n');
+	    localStringBuilder.append("root_type").append('\n');
+	    localStringBuilder.append(j).append('\n').append('\n');
+	    
+	    localStringBuilder.append("env").append('\n');
+	    for (int i = 0; i < k; ++i) {
+	    	arrayOfString1[i] = paramBundle.getString("env_" + i);
+	    	localStringBuilder.append(arrayOfString1[i]).append('\n');
+	    }
+	    localStringBuilder.append('\n');
+	    
+	    localStringBuilder.append("arg").append('\n');
+	    for (int i = 0; i < n; ++i) {
+	    	arrayOfString2[i] = paramBundle.getString("arg_" + i);
+	    	localStringBuilder.append(arrayOfString2[i]).append('\n');
+	    }
+	    localStringBuilder.append('\n');
+	    writeFileData(localFile, localStringBuilder.toString());
+	  }
+	 
+	public void writeFileData(File paramFile, String paramString) {
+		try {
+			FileOutputStream localFileOutputStream = new FileOutputStream(paramFile);
+			localFileOutputStream.write(paramString.getBytes());
+			localFileOutputStream.close();
+			return;
+		} catch (Exception localException) {
+			localException.printStackTrace();
+		}
+	}
+
 	
 	class CheckSuRunnable implements Runnable {
 		public void run() {

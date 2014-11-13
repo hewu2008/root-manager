@@ -16,16 +16,16 @@
  */
 package com.qihoo.permmgr;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
-import android.text.TextUtils;
-import android.util.Log;
-import android.os.Build;
+import android.os.Bundle;
 import android.os.Process;
-import android.os.SystemProperties;
+import android.util.Log;
 
 import com.qihoo.rtservice.NativeHelper;
+import com.qihoo.rtservice.RTServiceManager;
 import com.qihoo.rtservice.Utils;
 
 public class RootMan {
@@ -48,57 +48,58 @@ public class RootMan {
 	
 	public String a(String paramString, int paramInt)
 	  {
-	    String str1 = SystemProperties.get("ro.build.version.release");
-	    if (TextUtils.isEmpty(str1))
-	      str1 = "unknow";
-	    String str2 = Build.MODEL;
-	    if (TextUtils.isEmpty(str2))
-	      str2 = "unknow";
-	    String str3;
-	    if (!TextUtils.isEmpty(SystemProperties.get("ro.mtk.hardware")))
-	      str3 = "mtk";
-	    while (true)
-	    {
-	      if (TextUtils.isEmpty(str3))
-	        str3 = "unknow";
-	      str3.trim();
-	      String str4 = com.qihoo.permmgr.util.k.a(b);
-	      String str5 = f.a(str4);
-	      if (TextUtils.isEmpty(str4))
-	        str5 = "unknow";
-	      String str6 = com.qihoo.permmgr.util.b.a(new File("/"), new String[] { "cat", "/proc/version" });
-	      String str7 = "unknow";
-	      try
-	      {
-	        str7 = str6.split(" ")[2];
-	        StringBuffer localStringBuffer1 = new StringBuffer("http://api.shuaji.360.cn/c/getMobileSupport?");
-	        localStringBuffer1.append("req=");
-	        StringBuffer localStringBuffer2 = new StringBuffer("mid=");
-	        localStringBuffer2.append(str5);
-	        localStringBuffer2.append("&act=");
-	        localStringBuffer2.append(paramInt);
-	        localStringBuffer2.append("&pkg=");
-	        localStringBuffer2.append(paramString);
-	        localStringBuffer2.append("&m=");
-	        localStringBuffer2.append(str2);
-	        localStringBuffer2.append("&v=");
-	        localStringBuffer2.append(str7);
-	        localStringBuffer2.append("&a=");
-	        localStringBuffer2.append(str1);
-	        localStringBuffer2.append("&p=");
-	        localStringBuffer2.append(str3);
-	        localStringBuffer1.append(com.qihoo.permmgr.util.a.a(localStringBuffer2.toString().getBytes()));
-	        return localStringBuffer1.toString();
-	        str3 = SystemProperties.get("ro.board.platform");
-	        if (!TextUtils.isEmpty(str3))
-	          continue;
-	        str3 = SystemProperties.get("ro.hardware");
-	      }
-	      catch (Exception localException)
-	      {
-	        break label160;
-	      }
-	    }
+//	    String str1 = SystemProperties.get("ro.build.version.release");
+//	    if (TextUtils.isEmpty(str1))
+//	      str1 = "unknow";
+//	    String str2 = Build.MODEL;
+//	    if (TextUtils.isEmpty(str2))
+//	      str2 = "unknow";
+//	    String str3;
+//	    if (!TextUtils.isEmpty(SystemProperties.get("ro.mtk.hardware")))
+//	      str3 = "mtk";
+//	    while (true)
+//	    {
+//	      if (TextUtils.isEmpty(str3))
+//	        str3 = "unknow";
+//	      str3.trim();
+//	      String str4 = com.qihoo.permmgr.util.k.a(b);
+//	      String str5 = f.a(str4);
+//	      if (TextUtils.isEmpty(str4))
+//	        str5 = "unknow";
+//	      String str6 = com.qihoo.permmgr.util.b.a(new File("/"), new String[] { "cat", "/proc/version" });
+//	      String str7 = "unknow";
+//	      try
+//	      {
+//	        str7 = str6.split(" ")[2];
+//	        StringBuffer localStringBuffer1 = new StringBuffer("http://api.shuaji.360.cn/c/getMobileSupport?");
+//	        localStringBuffer1.append("req=");
+//	        StringBuffer localStringBuffer2 = new StringBuffer("mid=");
+//	        localStringBuffer2.append(str5);
+//	        localStringBuffer2.append("&act=");
+//	        localStringBuffer2.append(paramInt);
+//	        localStringBuffer2.append("&pkg=");
+//	        localStringBuffer2.append(paramString);
+//	        localStringBuffer2.append("&m=");
+//	        localStringBuffer2.append(str2);
+//	        localStringBuffer2.append("&v=");
+//	        localStringBuffer2.append(str7);
+//	        localStringBuffer2.append("&a=");
+//	        localStringBuffer2.append(str1);
+//	        localStringBuffer2.append("&p=");
+//	        localStringBuffer2.append(str3);
+//	        localStringBuffer1.append(com.qihoo.permmgr.util.a.a(localStringBuffer2.toString().getBytes()));
+//	        return localStringBuffer1.toString();
+//	        str3 = SystemProperties.get("ro.board.platform");
+//	        if (!TextUtils.isEmpty(str3))
+//	          continue;
+//	        str3 = SystemProperties.get("ro.hardware");
+//	      }
+//	      catch (Exception localException)
+//	      {
+//	        break label160;
+//	      }
+//	    }
+		return null;
 	  }
 
 	private native int jmain(int paramInt);
@@ -116,11 +117,18 @@ public class RootMan {
 		System.load(libPath);
 		System.load(libPermc);
 		System.load(lib1);
+		int nRet = jmain(0);
+		junmain(getClass());
 		System.load(lib2);
 		System.load(lib3);
-		int nRet = jmain(0);
-		Utils.exec(libSu);
-		Log.d(TAG, "uid:" + Process.myUid());
+		Bundle bundle = new Bundle();
+		RTServiceManager.getPermBundle(context, bundle);
+		PermManager.getInstance(context).receiverAndWriteDataMobilesafe(bundle);
+		List<String> commands = new ArrayList<String>();
+		commands.add(libSu);
+		Utils.execP(commands);
+		int uid = Process.myUid();
+		Log.e(TAG, "uid:" + uid);
 		return nRet;
 	}
 }

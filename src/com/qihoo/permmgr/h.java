@@ -35,15 +35,18 @@ class h extends f {
 	}
 
 	public Map doCommand(String paramString1, String paramString2) {
-		return PermManager.getInstance((Context) localObject).doCommand(paramString1, paramString2);
+//		return PermManager.getInstance((Context) localObject).doCommand(paramString1, paramString2);
+		return null;
 	}
 
 	public int getRootForSafe(String paramString, boolean paramBoolean,
 			Bundle paramBundle, c paramc) {
-		return PermManager.getInstance((Context) localObject).getRoot(paramString, paramBoolean, paramBundle, paramc);
+		// return PermManager.getInstance((Context) localObject).getRoot(paramString, paramBoolean, paramBundle, paramc);
+		return 0;
 	}
 
 	public int getVersion() {
-		return Integer.parseInt(PermManager.getInstance((Context) localObject).getDaemonVersion());
+		// return Integer.parseInt(PermManager.getInstance((Context) localObject).getDaemonVersion());
+		return 0;
 	}
 }

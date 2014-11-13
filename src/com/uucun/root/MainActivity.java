@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.qihoo.appstore.R;
 import com.qihoo.constant.Constants;
+import com.qihoo.permmgr.PermService;
 import com.qihoo.permmgr.RootMan;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
@@ -54,7 +55,8 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		initView();
 		setListener();
-		new RootAsyncTask().execute();
+		Intent localIntent = new Intent(this, PermService.class);
+		startService(localIntent);
 	}
 
 	private void initView() {
