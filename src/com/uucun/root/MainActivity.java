@@ -18,8 +18,6 @@
 package com.uucun.root;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -37,7 +35,6 @@ import android.widget.Toast;
 
 import com.qihoo.appstore.R;
 import com.qihoo.constant.Constants;
-import com.qihoo.permmgr.PermService;
 import com.qihoo.permmgr.RootMan;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
@@ -55,8 +52,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		initView();
 		setListener();
-		Intent localIntent = new Intent(this, PermService.class);
-		startService(localIntent);
+		new RootAsyncTask().execute();
 	}
 
 	private void initView() {
@@ -81,10 +77,16 @@ public class MainActivity extends Activity {
 			}
 		});
 	}
-
+	
+	/**
+	 * 执行临时ROOT
+	 */
 	private int doRoot() {
 		RootMan root = RootMan.getInstance();
-		return root.doRoot(this);
+		if (getRTService() == null)
+			return root.doRoot(this);
+		else
+			return 3000;
 	}
 
 	private void startRootProcess() {
@@ -162,16 +164,15 @@ public class MainActivity extends Activity {
 	private class StartProcessAsyncTask extends AsyncTask<Void, Void, String> {
 		@Override
 		protected String doInBackground(Void... params) {
-			List<String> commands = new ArrayList<String>();
-			String exportCmd = "export CLASSPATH=$CLASSPATH:"
-					+ MainActivity.this.getPackageCodePath();
-			commands.add(exportCmd);
-			String servicePath = IRTServiceImpl.class.getName();
-			String startProcessCmd = String
-					.format("app_process /system/bin %s --nice-name=%s --application &",
-							servicePath, IRTServiceImpl.SERVICE_NAME);
-			commands.add(startProcessCmd);
-			return Utils.execP(commands);
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (getRTService() != null) 
+				return "success";
+			else 
+				return "false";
 		}
 
 		@Override
