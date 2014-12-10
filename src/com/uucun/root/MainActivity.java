@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) 2014-2015 hewu <hewu2008@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.uucun.root;
 
 import java.io.File;
@@ -26,23 +43,6 @@ import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
 import com.qihoo.rtservice.Utils;
 import com.qihoo.utils.FileUtils;
-
-/**
- * Copyright (C) 2014-2015 hewu <hewu2008@gmail.com>
- * 
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
- */
 
 public class MainActivity extends Activity {
 	private TextView mStatusText = null;
@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
 			}
 		});
 	}
-	
+
 	private int doRoot() {
 		RootMan root = RootMan.getInstance();
 		return root.doRoot(this);
@@ -112,11 +112,11 @@ public class MainActivity extends Activity {
 		intent.addCategory(Intent.CATEGORY_OPENABLE);
 		try {
 			startActivityForResult(
-				Intent.createChooser(intent, "select apk file"),
-				FILE_SELECT_CODE);
+					Intent.createChooser(intent, "select apk file"),
+					FILE_SELECT_CODE);
 		} catch (android.content.ActivityNotFoundException ex) {
 			Toast.makeText(this, "Please install a File Manager.",
-				Toast.LENGTH_SHORT).show();
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 

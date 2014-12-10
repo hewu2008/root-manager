@@ -339,7 +339,7 @@ public class PermManager {
 	
 	private native Object jcheckdaemon(Object object);
 	
-	private native Object jdocommand(Object object, String paramString, int paramInt);
+	public native Object jdocommand(Object object, String paramString, int paramInt);
 	
 	private native int jrestartdaemon(String paramString);
 	
@@ -357,11 +357,11 @@ public class PermManager {
 		return mInstance;
 	}
 	
-	class OutInfo {
-		private int err;
-		private String out;
-		private int running;
-		private String version;
+	public static class OutInfo {
+		public int err;
+		public String out;
+		public int running;
+		public String version;
 
 		OutInfo(PermManager paramPermManager) {
 		}
@@ -472,6 +472,42 @@ public class PermManager {
 	    localStringBuilder.append('\n');
 	    writeFileData(localFile, localStringBuilder.toString());
 	  }
+	 
+	public void saveEnv(Bundle paramBundle) {
+		File permDir = new File(this.mContext.getFilesDir().getAbsoluteFile() + "/permmgr/");
+		Log.e("permmgr", "permDir:" + permDir.getAbsolutePath());
+		permDir.mkdirs();
+		File localFile = new File(this.mContext.getFilesDir().getAbsoluteFile() + "/permmgr/" + "env_file");
+		if ((localFile != null) && (localFile.exists()))
+			localFile.delete();
+		paramBundle.getInt("root_type", 0);
+		int j = paramBundle.getInt("env_num", 0);
+		int k = paramBundle.getInt("arg_num", 0);
+		String[] arrayOfString1 = new String[j];
+		String[] arrayOfString2 = new String[k];
+		StringBuilder localStringBuilder = new StringBuilder();
+		localStringBuilder.append("#!/system/bin/sh");
+		localStringBuilder.append('\n');
+		for (int i = 0; i < j; ++i) {
+			arrayOfString1[i] = paramBundle.getString("env_" + i);
+			localStringBuilder.append("export " + arrayOfString1[i]);
+			localStringBuilder.append('\n');
+		}
+		for (int i = 0; i < k; ++i) {
+			arrayOfString2[i] = paramBundle.getString("arg_" + i);
+			localStringBuilder.append(arrayOfString2[i]);
+			localStringBuilder.append(" ");
+		}
+		localStringBuilder.append("\n");
+		localStringBuilder.append("rm " + localFile.getAbsolutePath());
+		localStringBuilder.append("\n");
+		writeFileData(localFile, localStringBuilder.toString());
+		try {
+			Runtime.getRuntime().exec("chmod 755 " + localFile.getPath()).waitFor();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+	}
 	 
 	public void writeFileData(File paramFile, String paramString) {
 		try {

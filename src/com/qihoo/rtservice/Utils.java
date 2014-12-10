@@ -73,7 +73,7 @@ public class Utils {
 		DataOutputStream os = null;
 		String result = "";
 		try {
-			process = Runtime.getRuntime().exec("su");
+			process = Runtime.getRuntime().exec(getSuPath());
 			os = new DataOutputStream(process.getOutputStream());
 			for (String command : commands) {
 				os.writeBytes(command + "\n");
@@ -114,7 +114,7 @@ public class Utils {
 		DataOutputStream os = null;
 		String result = "";
 		try {
-			process = Runtime.getRuntime().exec(command);
+			process = Runtime.getRuntime().exec(new String[]{"su", "-c", command});
 			os = new DataOutputStream(process.getOutputStream());
 			os.writeBytes("echo \"rc:\" $?\n");
 			os.writeBytes("exit\n");

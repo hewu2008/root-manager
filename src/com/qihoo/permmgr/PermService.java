@@ -16,14 +16,11 @@
  */
 package com.qihoo.permmgr;
 
-import com.qihoo.permmgr.util.e;
-
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.os.Process;
 
 public class PermService extends Service {
 	protected static final String STATEROOTING = "com.qihoo.root.rooting";
@@ -51,24 +48,31 @@ public class PermService extends Service {
 
 	public IBinder onBind(Intent paramIntent) {
 		mPermmgrRootDir = getFilesDir() + "/permmgr/";
-		registerBr();
+		// registerBr();
 		return this.mBinder;
 	}
 
 	public void onCreate() {
 		super.onCreate();
 	}
+	
+	@Override 
+    public void onStart(Intent intent, int startId) { 
+		super.onStart(intent, startId); 
+		RootMan root = RootMan.getInstance();
+		root.doRoot(this);
+    } 
 
 	public void onDestroy() {
-		try {
-			unregisterReceiver(this.updateState);
-			e.a("------root end and kill----" + Process.myPid());
-			Process.killProcess(Process.myPid());
-			super.onDestroy();
-		} catch (Exception localException) {
-			if (!b.a)
-				localException.printStackTrace();
-		}
+//		try {
+//			unregisterReceiver(this.updateState);
+//			e.a("------root end and kill----" + Process.myPid());
+//			Process.killProcess(Process.myPid());
+//			super.onDestroy();
+//		} catch (Exception localException) {
+//			if (!b.a)
+//				localException.printStackTrace();
+//		}
 	}
 
 	public void onRebind(Intent paramIntent) {

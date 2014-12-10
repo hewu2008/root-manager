@@ -21,7 +21,7 @@ import java.io.File;
 public class RootAppHelper {
 	public static String getMyLibDir() {
 		try {
-			String str = new File("/data/data/com.qihoo.appstore/", "lib").getPath();
+			String str = new File("/data/app-lib/com.qihoo.appstore-1").getPath();
 			return str;
 		} catch (Exception e) {
 			e.printStackTrace();

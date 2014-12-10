@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.util.Log;
 
+import com.qihoo.permmgr.PermManager.OutInfo;
 import com.qihoo.rtservice.NativeHelper;
 import com.qihoo.rtservice.RTServiceManager;
 import com.qihoo.rtservice.Utils;
@@ -107,28 +108,16 @@ public class RootMan {
 	private native void junmain(Class<?> paramClass);
 	
 	public int doRoot(Context context) {
-		String libPath = NativeHelper.copyNativeLib(context, "permmgr/lib360.so");
-		String libPermc = NativeHelper.copyNativeLib(context, "permmgr/Libpermc.so");
-		String libSu = NativeHelper.copyNativeLib(context, "permmgr/libsu.so");
-		String lib1 = NativeHelper.copyNativeLib(context, "permmgr/1403615456842.so");
-		String lib2 = NativeHelper.copyNativeLib(context, "permmgr/1406613154560.so");
-		String lib3 = NativeHelper.copyNativeLib(context, "permmgr/1413965415665.so");
-		NativeHelper.copyNativeElf(context, "libroot");
-		System.load(libPath);
-		System.load(libPermc);
-		System.load(lib1);
-		int nRet = jmain(0);
-		junmain(getClass());
-		System.load(lib2);
-		System.load(lib3);
 		Bundle bundle = new Bundle();
 		RTServiceManager.getPermBundle(context, bundle);
-		PermManager.getInstance(context).receiverAndWriteDataMobilesafe(bundle);
-		List<String> commands = new ArrayList<String>();
-		commands.add(libSu);
-		Utils.execP(commands);
-		int uid = Process.myUid();
-		Log.e(TAG, "uid:" + uid);
+		PermManager.getInstance(context).saveEnv(bundle);
+		NativeHelper.copyNativeLib(context, "libsu.so");
+		String lib3 = NativeHelper.copyNativeLib(context, "1413965415665.so");
+		System.load(lib3);
+		int nRet = jmain(0);
+		Log.e(TAG, "jmain return code:" + nRet);
+		junmain(getClass());
+		Log.e(TAG, "junmain release resource finish");
 		return nRet;
 	}
 }

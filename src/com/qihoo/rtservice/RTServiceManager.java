@@ -16,12 +16,22 @@
  */
 package com.qihoo.rtservice;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.ServiceManager;
+import android.util.Log;
+import com.qihoo.permmgr.f;
 
+import com.qihoo.permmgr.PermService;
 import com.qihoo.rtservice.support.RootAppHelper;
 
 public class RTServiceManager implements IRTService {
@@ -32,39 +42,43 @@ public class RTServiceManager implements IRTService {
 	private static Object d = new Object();
 	private static final Handler e = new Handler(Looper.getMainLooper());
 	private static boolean f = false;
+	private static Context mContext = null;
 
 	// private static h g;
-//	private static int a(Context paramContext, boolean paramBoolean1, boolean paramBoolean2) 
-//	{
-//	    f = true;
-//	    Intent localIntent = new Intent(paramContext, PermService.class);
-//	    AtomicInteger localAtomicInteger = new AtomicInteger(691);
-//	    com.qihoo.appstore.utils.e locale = new com.qihoo.appstore.utils.e();
-//	    RTServiceConnection local5 = new RTServiceConnection(paramContext, localAtomicInteger, paramBoolean1, locale);
-//	    locale.b();
-//	    try
-//	    {
-//	      if (paramContext.bindService(localIntent, local5, 1))
-//	        if (paramBoolean1)
-//	        {
-//	          Log.d("RTService", "startByTempRoot callWait");
-//	          locale.a(60000L);
-//	        }
-//	      while (true)
-//	      {
-//	        Log.d("RTService", "startByTempRoot back from wait");
-//	        Log.d("RTService", "startByTempRoot return " + localAtomicInteger.get());
-//	        f = false;
-//	        return localAtomicInteger.get();
-//	        localAtomicInteger.set(692);
-//	      }
-//	    }
-//	    catch (Exception localException)
-//	    {
-//	      while (true)
-//	        localAtomicInteger.set(693);
-//	    }
-//	  }
+//	private static int a(Context paramContext, boolean paramBoolean1,
+//			boolean paramBoolean2) {
+//		mContext = paramContext;
+//		f = true;
+//		Intent localIntent = new Intent(paramContext, PermService.class);
+//		AtomicInteger localAtomicInteger = new AtomicInteger(691);
+//		// com.qihoo.appstore.utils.e locale = new com.qihoo.appstore.utils.e();
+//		RTServiceConnection local5 = new RTServiceConnection(paramContext,
+//				localAtomicInteger, paramBoolean1);
+//		// locale.b();
+//		// try
+//		// {
+//		// if (paramContext.bindService(localIntent, local5, 1))
+//		// if (paramBoolean1)
+//		// {
+//		// Log.d("RTService", "startByTempRoot callWait");
+//		// locale.a(60000L);
+//		// }
+//		// while (true)
+//		// {
+//		// Log.d("RTService", "startByTempRoot back from wait");
+//		// Log.d("RTService", "startByTempRoot return " +
+//		// localAtomicInteger.get());
+//		// f = false;
+//		// return localAtomicInteger.get();
+//		// localAtomicInteger.set(692);
+//		// }
+//		// }
+//		// catch (Exception localException)
+//		// {
+//		// while (true)
+//		// localAtomicInteger.set(693);
+//		// }
+//	}
 
 	public static void getPermBundle(Context paramContext, Bundle paramBundle) {
 		String str1 = "";
@@ -75,13 +89,15 @@ public class RTServiceManager implements IRTService {
 		str2 = String.format("CLASSPATH=%s", new Object[] { str1 });
 		str3 = System.getenv("LD_LIBRARY_PATH");
 		str4 = RootAppHelper.getMyLibDir();
-		String str5 = String.format("LD_LIBRARY_PATH=/vendor/lib:/system/lib:%s", str4);
-		String str6 = String.format("_LD_LIBRARY_PATH=%s", new Object[] { str5 });
-		String str7 = String.format("LD_LIBRARY_PATH=%s", new Object[] { str5 });
+		String str5 = String.format(
+				"LD_LIBRARY_PATH=/vendor/lib:/system/lib:%s", str4);
+		String str6 = String.format(
+				"_LD_LIBRARY_PATH=/vendor/lib:/system/lib:%s", str4);
 		paramBundle.putString("env_0", str2);
 		paramBundle.putString("env_1", str6);
-		paramBundle.putString("env_2", str7);
-		paramBundle.putString("env_3", "PATH=/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin");
+		paramBundle.putString("env_2", str5);
+		paramBundle.putString("env_3",
+				"PATH=/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin");
 		paramBundle.putInt("env_num", 3);
 		paramBundle.putInt("root_type", 1);
 		paramBundle.putInt("arg_num", 5);
@@ -89,35 +105,50 @@ public class RTServiceManager implements IRTService {
 		paramBundle.putString("arg_1", "/system/bin");
 		paramBundle.putString("arg_2", IRTServiceImpl.class.getName());
 		paramBundle.putString("arg_3", "--nice-name=qh_rt_service");
-		paramBundle.putString("arg_4", "--application");
+		paramBundle.putString("arg_4", "--application&");
 		try {
-			str1 = paramContext.getPackageManager().getPackageInfo(paramContext.getPackageName(), 0).applicationInfo.publicSourceDir;
+			str1 = paramContext.getPackageManager().getPackageInfo(
+					paramContext.getPackageName(), 0).applicationInfo.publicSourceDir;
 		} catch (PackageManager.NameNotFoundException localNameNotFoundException) {
 			localNameNotFoundException.printStackTrace();
 		}
-		}
+	}
+
+	public static IRootService getRTService() {
+		IBinder localIBinder = ServiceManager.getService("qh_rt_service");
+		if (localIBinder != null)
+			return IRootService.Stub.asInterface(localIBinder);
+		return null;
 	}
 
 //	final class RTServiceConnection implements ServiceConnection {
-//		public void onServiceConnected(ComponentName paramComponentName, IBinder paramIBinder)
-//	  {
-//	    Log.d("RTService", "onServiceConnected");
-//	    new RTServiceConnectionThread(this, f.a(paramIBinder), this).start();
-//	  }
+//		private Context mparamContext;
+//		private AtomicInteger mlocalAtomicInteger;
+//		private boolean mparamBoolean1;
+//
+//		RTServiceConnection(Context paramContext,
+//				AtomicInteger localAtomicInteger, boolean paramBoolean1) {
+//			mparamContext = paramContext;
+//			mlocalAtomicInteger = localAtomicInteger;
+//			mparamBoolean1 = paramBoolean1;
+//		}
+//
+//		public void onServiceConnected(ComponentName paramComponentName,
+//				IBinder paramIBinder) {
+//			Log.d("RTService", "onServiceConnected");
+//			new RTServiceConnectionThread().start();
+//		}
 //
 //		public void onServiceDisconnected(ComponentName paramComponentName) {
 //		}
 //
 //		class RTServiceConnectionThread extends Thread {
-//			public void run()
-//	    {
-//	      boolean bool1 = true;
-//	      try
-//	      {
-//	        Bundle localBundle = new Bundle();
-//	        RTServiceManager.getPermBundle(this.c.a, localBundle);
-//	        i = this.a.getRootForSafe("2004", true, localBundle, new RTServiceManager.5.1.1(this));
-//	        bn.b("RTService", "resultCode is:" + i);
+//			public void run() {
+//				boolean bool1 = true;
+//				try {
+//						Bundle localBundle = new Bundle();
+//						RTServiceManager.getPermBundle(mparamContext, localBundle);
+//						int i = this.a.getRootForSafe("2004", true, localBundle, new RTServiceManagerCallback);
 //	        if (i == 3000)
 //	        {
 //	          int j;
@@ -177,4 +208,10 @@ public class RTServiceManager implements IRTService {
 //	    }
 //		}
 //	}
-// }
+//
+//	class RTServiceManagerCallback {
+//		public boolean onCheckRootServerExist() {
+//			return RTServiceManager.getRTService() != null;
+//		}
+//	}
+}

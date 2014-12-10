@@ -22,22 +22,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import android.content.Context;
+import android.util.Log;
 
 public class NativeHelper {
+	private static final String TAG = NativeHelper.class.getSimpleName();
+
 	public static String copyNativeLib(Context paramContext, String libname) {
 		// 检查文件是否是否存在
-		File libDir = paramContext.getDir("MyLibs", 0);
-		if (!libDir.exists())
-			libDir.mkdirs();
-		File permDir = new File(libDir, "permmgr");
+		File permDir = new File(paramContext.getFilesDir().getAbsoluteFile(), "permmgr");
 		if (permDir.exists() == false)
 			permDir.mkdirs();
-		File outFile = new File(libDir, libname);
+		File outFile = new File(permDir, libname);
 		if (outFile.exists() == true) 
 			return outFile.getAbsolutePath();
 		try {
 			// 拷贝asset下的库文件至指定的目录
-			InputStream is  = paramContext.getAssets().open(libname);
+			InputStream is  = paramContext.getAssets().open("permmgr/" + libname);
 			OutputStream dbOut = new FileOutputStream(outFile.getAbsolutePath());
 			byte[] buffer = new byte[1024];
 			int length;
@@ -48,6 +48,7 @@ public class NativeHelper {
 			dbOut.close();
 			is.close();
 			// 赋可执行权限
+			Log.e(TAG, "copy " + outFile.getAbsolutePath() + " success.");
 			Runtime.getRuntime().exec("chmod 755 " + outFile.getPath()).waitFor();
 			return outFile.getPath();
 		} catch (Exception e) {
