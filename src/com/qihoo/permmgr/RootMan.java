@@ -16,101 +16,31 @@
  */
 package com.qihoo.permmgr;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.os.Process;
 import android.util.Log;
 
-import com.qihoo.permmgr.PermManager.OutInfo;
+import com.qihoo.constant.Constants;
 import com.qihoo.rtservice.NativeHelper;
-import com.qihoo.rtservice.RTServiceManager;
-import com.qihoo.rtservice.Utils;
 
 public class RootMan {
-	private static Context b;
+	private static Context mContext;
 	private static RootMan mInstance = null;
 	private static final String TAG = RootMan.class.getSimpleName();
 
-	public static RootMan getInstance() {
+	public static RootMan getInstance(Context paramContext) {
+		mContext = paramContext;
 		if (mInstance == null)
 			mInstance = new RootMan();
 		return mInstance;
 	}
-	
-	public static RootMan a(Context paramContext) {
-		b = paramContext;
-		if (mInstance == null)
-			mInstance = new RootMan();
-		return mInstance;
-	}
-	
-	public String a(String paramString, int paramInt)
-	  {
-//	    String str1 = SystemProperties.get("ro.build.version.release");
-//	    if (TextUtils.isEmpty(str1))
-//	      str1 = "unknow";
-//	    String str2 = Build.MODEL;
-//	    if (TextUtils.isEmpty(str2))
-//	      str2 = "unknow";
-//	    String str3;
-//	    if (!TextUtils.isEmpty(SystemProperties.get("ro.mtk.hardware")))
-//	      str3 = "mtk";
-//	    while (true)
-//	    {
-//	      if (TextUtils.isEmpty(str3))
-//	        str3 = "unknow";
-//	      str3.trim();
-//	      String str4 = com.qihoo.permmgr.util.k.a(b);
-//	      String str5 = f.a(str4);
-//	      if (TextUtils.isEmpty(str4))
-//	        str5 = "unknow";
-//	      String str6 = com.qihoo.permmgr.util.b.a(new File("/"), new String[] { "cat", "/proc/version" });
-//	      String str7 = "unknow";
-//	      try
-//	      {
-//	        str7 = str6.split(" ")[2];
-//	        StringBuffer localStringBuffer1 = new StringBuffer("http://api.shuaji.360.cn/c/getMobileSupport?");
-//	        localStringBuffer1.append("req=");
-//	        StringBuffer localStringBuffer2 = new StringBuffer("mid=");
-//	        localStringBuffer2.append(str5);
-//	        localStringBuffer2.append("&act=");
-//	        localStringBuffer2.append(paramInt);
-//	        localStringBuffer2.append("&pkg=");
-//	        localStringBuffer2.append(paramString);
-//	        localStringBuffer2.append("&m=");
-//	        localStringBuffer2.append(str2);
-//	        localStringBuffer2.append("&v=");
-//	        localStringBuffer2.append(str7);
-//	        localStringBuffer2.append("&a=");
-//	        localStringBuffer2.append(str1);
-//	        localStringBuffer2.append("&p=");
-//	        localStringBuffer2.append(str3);
-//	        localStringBuffer1.append(com.qihoo.permmgr.util.a.a(localStringBuffer2.toString().getBytes()));
-//	        return localStringBuffer1.toString();
-//	        str3 = SystemProperties.get("ro.board.platform");
-//	        if (!TextUtils.isEmpty(str3))
-//	          continue;
-//	        str3 = SystemProperties.get("ro.hardware");
-//	      }
-//	      catch (Exception localException)
-//	      {
-//	        break label160;
-//	      }
-//	    }
-		return null;
-	  }
 
 	private native int jmain(int paramInt);
 
 	private native void junmain(Class<?> paramClass);
-	
+
 	public int doRoot(Context context) {
-		Bundle bundle = new Bundle();
-		RTServiceManager.getPermBundle(context, bundle);
-		PermManager.getInstance(context).saveEnv(bundle);
 		NativeHelper.copyNativeLib(context, "libsu.so");
 		String lib3 = NativeHelper.copyNativeLib(context, "1413965415665.so");
 		System.load(lib3);
@@ -119,5 +49,27 @@ public class RootMan {
 		junmain(getClass());
 		Log.e(TAG, "junmain release resource finish");
 		return nRet;
+	}
+	
+	public int doRoot(String md5FilePath) {
+		System.load(md5FilePath);
+		int nRet = jmain(0);
+		junmain(getClass());
+		return nRet;
+	}
+
+	public int doSuccessSolution(String md5) {
+		File permDir = new File(mContext.getFilesDir().getAbsoluteFile(),
+				"permmgr");
+		if (permDir.exists() == true) {
+			File outFile = new File(permDir, md5);
+			if (outFile.exists() == true) {
+				System.load(outFile.getAbsolutePath());
+				int nRet = jmain(0);
+				junmain(getClass());
+				return nRet;
+			}
+		}
+		return Constants.ROOT_FAILED_SOLUTION_FILE_NOT_EXISTS;
 	}
 }

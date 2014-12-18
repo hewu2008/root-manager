@@ -20,22 +20,37 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.qihoo.permmgr.util.b;
-import com.qihoo.permmgr.util.g;
+import com.qihoo.constant.Constants;
+import com.qihoo.permmgr.util.AESUtils;
+import com.qihoo.rtservice.RTServiceManager;
+import com.uucun.root.MainActivity;
 
 public class PermManager {
 	private static final int ACT_FAILBYSU = 3;
@@ -109,7 +124,6 @@ public class PermManager {
 					.getAbsolutePath() + this.mBaseLibiPath);
 			if (localFile.exists())
 				localFile.delete();
-			// checkFiles();
 			this.prefs = context.getSharedPreferences("permmgr", 0);
 		} catch (Exception localException) {
 			localException.printStackTrace();
@@ -186,13 +200,6 @@ public class PermManager {
 		return false;
 	}
 
-	/**
-	 * 更新permManager
-	 */
-	private void checkUpdate() {
-		new Thread(new UpdateRunnable()).start();
-	}
-
 	private void cleanFutext() {
 		String str = this.prefs.getString("successSolution", "");
 		if ((!TextUtils.isEmpty(str))
@@ -216,7 +223,6 @@ public class PermManager {
 	 * 执行jdocommand命令并返回结果
 	 */
 	private String doCommandNoErr(String paramString1, String paramString2) {
-		checkUpdate();
 		OutInfo outInfo = (OutInfo) jdocommand(this.mInfo, paramString1, 30);
 		return outInfo.out;
 	}
@@ -230,108 +236,83 @@ public class PermManager {
 	}
 
 	/**
-	 * 检查是否支持saferoot Map
+	 * 执行成功的root方案
 	 */
-	public Map checkIsSupportForSafe(String paramString, boolean paramBoolean) {
-		// HashMap localHashMap = new HashMap();
-		// if (this.prefs == null) this.prefs =
-		// this.mContext.getSharedPreferences("permmgr", 0);
-		// // 检查是否曾经root过
-		// if ((System.currentTimeMillis() -
-		// this.prefs.getLong("checksupportlasttime", 0L) < 7200000L) &&
-		// (!paramBoolean))
-		// {
-		// localHashMap.clear();
-		// localHashMap.put("mobile",
-		// Integer.valueOf(this.prefs.getInt("checksupportresult", 0)));
-		// localHashMap.put("pc",
-		// Integer.valueOf(this.prefs.getInt("checksupportresultforpc", 0)));
-		// localHashMap.put("err", Integer.valueOf(100));
-		// return localHashMap;
-		// }
-		// // 检查是否有网络连接
-		// if (!com.qihoo.permmgr.util.d.a(this.mContext))
-		// {
-		// localHashMap.clear();
-		// localHashMap.put("mobile", Integer.valueOf(0));
-		// localHashMap.put("pc", Integer.valueOf(0));
-		// localHashMap.put("err", Integer.valueOf(101));
-		// return localHashMap;
-		// }
-		// try
-		// {
-		// String str = d.a(RootMan.a(this.mContext).a(paramString, 1), 10000);
-		// if (str == null)
-		// {
-		// localHashMap.clear();
-		// localHashMap.put("mobile", Integer.valueOf(0));
-		// localHashMap.put("pc", Integer.valueOf(0));
-		// localHashMap.put("err", Integer.valueOf(102));
-		// return localHashMap;
-		// }
-		// }
-		// catch (ParseException localParseException)
-		// {
-		// String str;
-		// localHashMap.clear();
-		// localHashMap.put("mobile", Integer.valueOf(0));
-		// localHashMap.put("pc", Integer.valueOf(0));
-		// localHashMap.put("err", Integer.valueOf(103));
-		// return localHashMap;
-		// JSONObject localJSONObject = new JSONObject(str);
-		// int i = localJSONObject.getInt("mobile");
-		// int j = localJSONObject.getInt("pc");
-		// this.prefs.edit().putLong("checksupportlasttime",
-		// System.currentTimeMillis()).commit();
-		// this.prefs.edit().putInt("checksupportresult", i).commit();
-		// this.prefs.edit().putInt("checksupportresultforpc", j).commit();
-		// localHashMap.clear();
-		// localHashMap.put("mobile", Integer.valueOf(i));
-		// localHashMap.put("pc", Integer.valueOf(j));
-		// localHashMap.put("err", Integer.valueOf(100));
-		// return localHashMap;
-		// }
-		// catch (IOException localIOException)
-		// {
-		// localIOException.printStackTrace();
-		// }
-		// catch (JSONException localJSONException)
-		// {
-		// localJSONException.printStackTrace();
-		// }
-		return null;
+	public int doSuccessSolution(String md5) {
+		return RootMan.getInstance(mContext).doSuccessSolution(md5);
 	}
 
-	// private int doSolutionBySU(String paramString, c paramc) {
-	// if (isHaveSu) {
-	// new Thread(new CheckSuRunnable()).start();
-	// g instance = g.a(mContext);
-	// int paramInt1 = 22;
-	// int paramInt2 = 3000;
-	// int paramInt3 = 1;
-	// String paramString1 = "";
-	// int paramInt4 = 203;
-	// String paramString2 = "";
-	// instance.a(mContext, paramInt1, paramInt2, paramInt3, paramString1,
-	// paramInt4, paramString2);
-	// paramc.onCheckRootServerExist();
-	// }
-	// return 0;
-	// }
-	//
-	
-	public int doSolutionOnline() {
-		Log.d("doSolutionOnline", "[*] online");
-		g.a(this.mContext).a(this.mContext, 21, 0, -1, "0", 300, "do online solution");
-		// int i = RootMan.a(this.mContext).a();
-		// if ((i == 3000) && (!checkRT_server(paramc)))
-		// {
-		// i = 3046;
-		// Log.d("doSolutionOnline", "3000 but service not running");
-		// }
-		// this.resultcode = i;
-		// Log.d("doSolutionOnline", "[*] end");
-		return this.resultcode;
+	/**
+	 * 执行本地root方案
+	 */
+	public int doSolutionLocal() {
+		return LocalRoot.getInstance().doRoot(mContext);
+	}
+
+	public int doSolutionOnline(MainActivity activity) {
+		String str1 = SystemProperties.get("ro.build.version.release");
+		if (TextUtils.isEmpty(str1))
+			str1 = "unknow";
+		String str2 = Build.MODEL;
+		if (TextUtils.isEmpty(str2))
+			str2 = "unknow";
+		String str3 = "unknow";
+		if ((!TextUtils
+				.isEmpty(SystemProperties.get("ro.product.manufacturer")))
+				|| (!TextUtils.isEmpty(SystemProperties.get("ro.mtk.hardware"))))
+			str3 = "mtk";
+		String str4 = com.qihoo.permmgr.util.k.a(mContext);
+		String str5 = com.qihoo.permmgr.util.f.a(str4);
+		if (TextUtils.isEmpty(str4))
+			str5 = "unknow";
+		File localFile = new File("/");
+		String[] arrayOfString = new String[2];
+		arrayOfString[0] = "cat";
+		arrayOfString[1] = "/proc/version";
+		String str6 = com.qihoo.permmgr.util.b.a(localFile, arrayOfString);
+		String str7 = str6.split(" ")[2];
+		String str8 = "model=" + URLEncoder.encode(str2) + "&target=1&buildno="
+				+ URLEncoder.encode(str7) + "&version="
+				+ URLEncoder.encode(str1) + "&platform="
+				+ URLEncoder.encode(str3);
+		String url = "http://api.shuaji.360.cn/c/getSolution?" + str8 + "&pkg="
+				+ a.e + "&mid=" + URLEncoder.encode(str5) + "&new=" + 1
+				+ "&src=1";
+		try {
+			HttpGet localHttpGet2 = new HttpGet(url);
+			HttpResponse localHttpResponse = new DefaultHttpClient()
+					.execute(localHttpGet2);
+			int statusCode = localHttpResponse.getStatusLine().getStatusCode();
+			String jsonData = AESUtils.b(EntityUtils.toString(localHttpResponse
+					.getEntity()));
+			JSONArray arr = new JSONArray(jsonData);
+			byte[] bs = new byte[1024];
+			int len;
+			for (int i = 0; i < arr.length(); i++) {
+				JSONObject temp = (JSONObject) arr.get(i);
+				String md5 = temp.getString("solution_md5");
+				String solution = temp.getString("solution");
+				activity.setStatus("downloading " + solution);
+				URL sUrl = new URL(solution);
+				URLConnection con = sUrl.openConnection();
+				InputStream is = con.getInputStream();
+				String md5FilePath = mContext.getFilesDir().getAbsoluteFile()
+						+ "/permmgr/" + md5;
+				OutputStream os = new FileOutputStream(md5FilePath);
+				while ((len = is.read(bs)) != -1) {
+					os.write(bs, 0, len);
+				}
+				os.close();
+				is.close();
+				if (RootMan.getInstance(mContext).doRoot(md5FilePath) == Constants.ROOT_SUCCESS) {
+					return Constants.ROOT_SUCCESS;
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Constants.NOTSUPPORT;
 	}
 
 	private native Object jcheckdaemon(Object object);
@@ -362,94 +343,6 @@ public class PermManager {
 		public String version;
 
 		OutInfo(PermManager paramPermManager) {
-		}
-	}
-
-	class UpdateRunnable implements Runnable {
-		public void run() {
-			// if (PermManager.access$0(this.this$0) == null)
-			// PermManager.access$2(this.this$0,
-			// PermManager.access$1(this.this$0).getSharedPreferences("permmgr",
-			// 0));
-			// if (System.currentTimeMillis() -
-			// PermManager.access$0(this.this$0).getLong("checklasttime", 0L) <
-			// 86400000L);
-			// do
-			// return;
-			// while (PermManager.access$3(this.this$0));
-			// try
-			// {
-			// boolean bool = d.a(PermManager.access$1(this.this$0));
-			// if (!bool)
-			// return;
-			// PermManager.access$4(this.this$0, true);
-			// String str1 = d.a(PermManager.access$5(this.this$0), 10000);
-			// e.a("updatabegin--vvv--" + str1);
-			// PermManager.ConfigInfo localConfigInfo1 =
-			// PermManager.ConfigInfo.loadFromString(str1,
-			// PermManager.access$1(this.this$0));
-			// if ((localConfigInfo1 != null) && (localConfigInfo1.apkVersion >
-			// PermManager.access$0(this.this$0).getInt("check_version_client",
-			// 0)))
-			// {
-			// String str4 =
-			// PermManager.access$1(this.this$0).getFilesDir().getAbsolutePath()
-			// + PermManager.access$6(this.this$0);
-			// d.a(localConfigInfo1.apkUrl, 60000, str4);
-			// com.qihoo.permmgr.util.b.b("chmod 755 " + str4);
-			// PermManager.access$0(this.this$0).edit().putInt("check_version_client",
-			// localConfigInfo1.apkVersion);
-			// }
-			// String str2 = d.a(PermManager.access$7(this.this$0), 10000);
-			// e.a("updatabegin--vvv--" + str2);
-			// if (localConfigInfo1 != null)
-			// localConfigInfo1.clean(localConfigInfo1);
-			// PermManager.ConfigInfo localConfigInfo2 =
-			// PermManager.ConfigInfo.loadFromString(str2,
-			// PermManager.access$1(this.this$0));
-			// if ((localConfigInfo2 != null) && (localConfigInfo2.apkVersion >
-			// PermManager.access$0(this.this$0).getInt("check_version_libsu",
-			// 0)))
-			// {
-			// String str3 =
-			// PermManager.access$1(this.this$0).getFilesDir().getAbsolutePath()
-			// + PermManager.access$8(this.this$0);
-			// d.a(localConfigInfo2.apkUrl, 60000, str3);
-			// com.qihoo.permmgr.util.b.b("chmod 755 " + str3);
-			// PermManager.access$0(this.this$0).edit().putInt("check_version_libsu",
-			// localConfigInfo2.apkVersion);
-			// }
-			// PermManager.access$0(this.this$0).edit().putLong("checklasttime",
-			// System.currentTimeMillis()).commit();
-			// PermManager.access$4(this.this$0, false);
-			// return;
-			// }
-			// catch (ParseException localParseException)
-			// {
-			// PermManager.access$4(this.this$0, false);
-			// if (b.a)
-			// localParseException.printStackTrace();
-			// return;
-			// }
-			// catch (IOException localIOException)
-			// {
-			// PermManager.access$4(this.this$0, false);
-			// if (b.a)
-			// localIOException.printStackTrace();
-			// return;
-			// }
-			// catch (Exception localException)
-			// {
-			// PermManager.access$4(this.this$0, false);
-			// if (b.a)
-			// localException.printStackTrace();
-			// return;
-			// }
-			// finally
-			// {
-			// PermManager.access$4(this.this$0, false);
-			// }
-			// throw localObject;
 		}
 	}
 
@@ -489,7 +382,13 @@ public class PermManager {
 		writeFileData(localFile, localStringBuilder.toString());
 	}
 
-	public void saveEnv(Bundle paramBundle) {
+	public void saveEnv() {
+		Bundle bundle = new Bundle();
+		RTServiceManager.getPermBundle(mContext, bundle);
+		saveEnv(bundle);
+	}
+
+	private void saveEnv(Bundle paramBundle) {
 		File permDir = new File(this.mContext.getFilesDir().getAbsoluteFile()
 				+ "/permmgr/");
 		Log.e("permmgr", "permDir:" + permDir.getAbsolutePath());
@@ -537,27 +436,6 @@ public class PermManager {
 			return;
 		} catch (Exception localException) {
 			localException.printStackTrace();
-		}
-	}
-
-	class CheckSuRunnable implements Runnable {
-		public void run() {
-			try {
-				out = b.a(new File(mContext.getFilesDir().getAbsolutePath()
-						+ "/permmgr/"), "chmod 755 "
-						+ mContext.getFilesDir().getAbsolutePath()
-						+ "/permmgr/libsu.so;"
-						+ mContext.getFilesDir().getAbsolutePath()
-						+ "/permmgr/libsu.so &");
-				Log.d("run", "su out----" + out);
-				if ((!TextUtils.isEmpty(out))
-						&& ((out.contains("denied")) || (out
-								.contains("unallowed"))))
-					mRefuseByUser = true;
-			} catch (Exception localException) {
-				isHaveSu = false;
-				Log.d("run", "[-] su not exists");
-			}
 		}
 	}
 }

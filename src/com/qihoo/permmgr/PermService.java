@@ -59,8 +59,6 @@ public class PermService extends Service {
 	@Override 
     public void onStart(Intent intent, int startId) { 
 		super.onStart(intent, startId); 
-		RootMan root = RootMan.getInstance();
-		root.doRoot(this);
     } 
 
 	public void onDestroy() {

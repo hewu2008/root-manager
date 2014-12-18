@@ -31,7 +31,8 @@ class h extends f {
 	}
 
 	public Map checkIsSupportForSafe(String paramString, boolean paramBoolean) {
-		return PermManager.getInstance((Context) localObject).checkIsSupportForSafe(paramString, paramBoolean);
+		// return PermManager.getInstance((Context) localObject).checkIsSupportForSafe(paramString, paramBoolean);
+		return null;
 	}
 
 	public Map doCommand(String paramString1, String paramString2) {

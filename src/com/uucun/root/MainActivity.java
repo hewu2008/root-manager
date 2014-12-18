@@ -24,9 +24,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -36,15 +39,16 @@ import android.widget.Toast;
 import com.qihoo.appstore.R;
 import com.qihoo.constant.Constants;
 import com.qihoo.permmgr.PermManager;
-import com.qihoo.permmgr.RootMan;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
 import com.qihoo.rtservice.Utils;
+import com.qihoo.sharestore.SharedStore;
 import com.qihoo.utils.FileUtils;
 
 public class MainActivity extends Activity {
 	private TextView mStatusText = null;
 	private Button mBrowerApkFileBtn = null;
+	private Handler mHandler = null;
 	private static final int FILE_SELECT_CODE = 0;
 
 	@Override
@@ -55,15 +59,28 @@ public class MainActivity extends Activity {
 		setListener();
 		new RootAsyncTask().execute();
 	}
-
+	
+	/**
+	 * 初始化界面
+	 */
 	private void initView() {
 		mStatusText = (TextView) findViewById(R.id.tv_status);
 		mBrowerApkFileBtn = (Button) findViewById(R.id.btn_browser_apk_file);
 		mBrowerApkFileBtn.setVisibility(View.GONE);
 		mStatusText.setText("status:\n");
 	}
-
+	
+	/**
+	 * 设置监听器
+	 */
 	private void setListener() {
+		mHandler = new Handler() {
+			public void handleMessage(Message msg) {
+				String text = String.valueOf(msg.obj);
+				mStatusText.setText(text);
+				super.handleMessage(msg);
+			}
+		};
 		mBrowerApkFileBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -80,16 +97,39 @@ public class MainActivity extends Activity {
 	}
 	
 	/**
-	 * 执行临时ROOT
+	 * 设置当前的状态
 	 */
-	private int doRoot() {
-		PermManager manager = PermManager.getInstance(this);
-		manager.doSolutionOnline();
-		RootMan root = RootMan.getInstance();
-		if (getRTService() == null)
-			return root.doRoot(this);
-		else
-			return 3000;
+	public void setStatus(String status) {
+		Message msg = new Message();
+		msg.what = 0;
+		msg.obj = status;
+		mHandler.sendMessage(msg);
+	}
+	
+	/**
+	 * 执行ROOT方案
+	 */
+	private int doRootSolution() {
+		if (getRTService() != null) {
+			return Constants.ROOT_SUCCESS;
+		}
+		PermManager permManager = PermManager.getInstance(this);
+		setStatus("trying to save env_file.");
+		permManager.saveEnv();
+		SharedStore store = new SharedStore(this, Constants.SOLUTION_FILE);
+		String md5 = store.getString(Constants.KEY_SOLUTION_MD5, "");
+		if (TextUtils.isEmpty(md5)) {
+			setStatus("trying to do local solution...\n");
+			if (permManager.doSolutionLocal() != Constants.ROOT_SUCCESS) {
+				setStatus("trying to do online solution...\n");
+				return permManager.doSolutionOnline(this);
+			} else {
+				return Constants.ROOT_SUCCESS;
+			}
+		} else {
+			setStatus("trying to do success solution...\n");
+			return permManager.doSuccessSolution(md5);
+		}
 	}
 
 	private void startRootProcess() {
@@ -146,15 +186,18 @@ public class MainActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	/**
+	 * ROOT异步任务
+	 */
 	private class RootAsyncTask extends AsyncTask<Void, Void, Integer> {
 		@Override
 		protected void onPreExecute() {
-			mStatusText.append("do Rooting...\n");
+			mStatusText.append("do Rooting solution...\n");
 		}
 
 		@Override
 		protected Integer doInBackground(Void... params) {
-			return doRoot();
+			return doRootSolution();
 		}
 
 		@Override
