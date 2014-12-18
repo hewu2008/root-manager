@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.qihoo.appstore.R;
 import com.qihoo.constant.Constants;
+import com.qihoo.permmgr.PermManager;
 import com.qihoo.permmgr.RootMan;
 import com.qihoo.rtservice.IRTServiceImpl;
 import com.qihoo.rtservice.IRootService;
@@ -82,6 +83,8 @@ public class MainActivity extends Activity {
 	 * 执行临时ROOT
 	 */
 	private int doRoot() {
+		PermManager manager = PermManager.getInstance(this);
+		manager.doSolutionOnline();
 		RootMan root = RootMan.getInstance();
 		if (getRTService() == null)
 			return root.doRoot(this);
