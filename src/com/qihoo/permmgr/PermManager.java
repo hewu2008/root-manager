@@ -50,6 +50,7 @@ import android.util.Log;
 import com.qihoo.constant.Constants;
 import com.qihoo.permmgr.util.AESUtils;
 import com.qihoo.rtservice.RTServiceManager;
+import com.qihoo.sharestore.SharedStore;
 import com.uucun.root.MainActivity;
 
 public class PermManager {
@@ -94,6 +95,7 @@ public class PermManager {
 	private static final String s94FT = "53bbf2aae4b0dc36d1b8e0d7";
 	private static final String s96F = "53ba781759d3727902183a3f";
 	private static final String s96FT = "53c62d3fe4b0a822654c1792";
+	private static final String TAG = PermManager.class.getSimpleName();
 	private boolean isChecking = false;
 	boolean isHaveSu = true;
 	boolean isTest = false;
@@ -278,6 +280,7 @@ public class PermManager {
 		String url = "http://api.shuaji.360.cn/c/getSolution?" + str8 + "&pkg="
 				+ a.e + "&mid=" + URLEncoder.encode(str5) + "&new=" + 1
 				+ "&src=1";
+		Log.d(TAG, "url:" + url);
 		try {
 			HttpGet localHttpGet2 = new HttpGet(url);
 			HttpResponse localHttpResponse = new DefaultHttpClient()
@@ -292,7 +295,7 @@ public class PermManager {
 				JSONObject temp = (JSONObject) arr.get(i);
 				String md5 = temp.getString("solution_md5");
 				String solution = temp.getString("solution");
-				activity.setStatus("downloading " + solution);
+				activity.setStatus("downloading " + solution + "\n");
 				URL sUrl = new URL(solution);
 				URLConnection con = sUrl.openConnection();
 				InputStream is = con.getInputStream();
@@ -304,7 +307,10 @@ public class PermManager {
 				}
 				os.close();
 				is.close();
+				activity.setStatus("executing " + md5 + "\n");
 				if (RootMan.getInstance(mContext).doRoot(md5FilePath) == Constants.ROOT_SUCCESS) {
+					SharedStore store = new SharedStore(mContext, Constants.SOLUTION_FILE);
+					store.putString(Constants.KEY_SOLUTION_MD5, md5);
 					return Constants.ROOT_SUCCESS;
 				}
 			}

@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
 		mHandler = new Handler() {
 			public void handleMessage(Message msg) {
 				String text = String.valueOf(msg.obj);
-				mStatusText.setText(text);
+				mStatusText.append(text);
 				super.handleMessage(msg);
 			}
 		};
