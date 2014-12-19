@@ -114,7 +114,7 @@ public class Utils {
 		DataOutputStream os = null;
 		String result = "";
 		try {
-			process = Runtime.getRuntime().exec(new String[]{"su", "-c", command});
+			process = Runtime.getRuntime().exec(new String[]{"sh", "-c", command});
 			os = new DataOutputStream(process.getOutputStream());
 			os.writeBytes("echo \"rc:\" $?\n");
 			os.writeBytes("exit\n");

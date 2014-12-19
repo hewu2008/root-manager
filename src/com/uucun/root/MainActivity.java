@@ -133,14 +133,12 @@ public class MainActivity extends Activity {
 	}
 
 	private void startRootProcess() {
-		if (Utils.hasSuCmd() && getRTService() == null) {
+		if (getRTService() == null) {
 			mStatusText.append("starting root process, please wait...\n");
 			new StartProcessAsyncTask().execute();
 		} else if (getRTService() != null) {
 			mBrowerApkFileBtn.setVisibility(View.VISIBLE);
 			mStatusText.append("root process already started.\n");
-		} else {
-			mStatusText.append("does not supported this device.\n");
 		}
 	}
 
