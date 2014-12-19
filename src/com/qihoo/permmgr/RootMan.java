@@ -59,16 +59,14 @@ public class RootMan {
 	}
 
 	public int doSuccessSolution(String md5) {
-		File permDir = new File(mContext.getFilesDir().getAbsoluteFile(),
-				"permmgr");
-		if (permDir.exists() == true) {
-			File outFile = new File(permDir, md5);
-			if (outFile.exists() == true) {
-				System.load(outFile.getAbsolutePath());
-				int nRet = jmain(0);
-				junmain(getClass());
-				return nRet;
-			}
+		NativeHelper.copyNativeLib(mContext, "libsu.so");
+		String filePath = mContext.getFilesDir().getAbsoluteFile() + "/permmgr/" + md5;
+		File outFile = new File(filePath);
+		if (outFile.exists() == true) {
+			System.load(filePath);
+			int nRet = jmain(0);
+			junmain(getClass());
+			return nRet;
 		}
 		return Constants.ROOT_FAILED_SOLUTION_FILE_NOT_EXISTS;
 	}

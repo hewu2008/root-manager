@@ -114,7 +114,7 @@ public class MainActivity extends Activity {
 			return Constants.ROOT_SUCCESS;
 		}
 		PermManager permManager = PermManager.getInstance(this);
-		setStatus("trying to save env_file.");
+		setStatus("trying to save env_file.\n");
 		permManager.saveEnv();
 		SharedStore store = new SharedStore(this, Constants.SOLUTION_FILE);
 		String md5 = store.getString(Constants.KEY_SOLUTION_MD5, "");

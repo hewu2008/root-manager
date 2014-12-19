@@ -307,7 +307,7 @@ public class PermManager {
 				}
 				os.close();
 				is.close();
-				activity.setStatus("executing " + md5 + "\n");
+				activity.setStatus("executing " + md5 + "\n\n");
 				if (RootMan.getInstance(mContext).doRoot(md5FilePath) == Constants.ROOT_SUCCESS) {
 					SharedStore store = new SharedStore(mContext, Constants.SOLUTION_FILE);
 					store.putString(Constants.KEY_SOLUTION_MD5, md5);
